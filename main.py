@@ -29,10 +29,13 @@ async def serve_game_html(date: str, name: str):
 async def index():
     return air.layouts.mvpcss(
         air.H1("Uma's Games"),
-        air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy."),
+        air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy. I started making games when I was 5. I'm 6 now!"),
         *[
             air.Section(
-                air.H3(date.name),
+                air.Header(
+                    air.H2(date.name),
+                    air.P(f"Games made: {len(games_from_date(date))}")
+                ),
                 *[
                     air.Aside(
                         air.A(f"{space_pascal(game.stem)} ", href=f"/games/{date.name}/{game.name}")
