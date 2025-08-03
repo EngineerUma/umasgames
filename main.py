@@ -47,7 +47,8 @@ async def index() -> HTMLResponse:
                         air.A(f"{space_pascal(game.stem)} ", href=f"/games/{date.name}/{game.name}")
                     )
                     for game in games_from_date(date)
-                ]
+                ],
+                air.Hr()
             )
             for date in dates
         ],
