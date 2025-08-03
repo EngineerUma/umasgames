@@ -1,10 +1,14 @@
+
 import re
 import air
 from pathlib import Path
 from starlette.responses import HTMLResponse
 
+GAMES_DIR = "games"
+
 app: air.Air = air.Air()
 dates: list[Path] = sorted([d for d in Path('games').iterdir() if d.is_dir()], reverse=True)
+dates: list[Path] = sorted([d for d in Path(GAMES_DIR).iterdir() if d.is_dir()], reverse=True)
 
 def space_pascal(s: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', ' ', s)
@@ -17,7 +21,7 @@ def games_from_date(date: Path) -> list[Path]:
 @app.get("/games/{date}/{name}")
 async def serve_game_html(date: str, name: str) -> HTMLResponse:
     "Serve HTML files from /games/{date}/{name} with Starlette's HTMLResponse"
-    file_path: Path = Path(f"games/{date}/{name}")
+    file_path: Path = Path(f"{GAMES_DIR}/{date}/{name}")
     if not file_path.exists() or not file_path.is_file():
         return air.layouts.mvpcss(
             air.H1("Game not found"),
