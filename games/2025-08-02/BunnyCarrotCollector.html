@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Carrot Collector</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: #228B22;
+            border: 4px solid #8B4513;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            background: #32CD32;
+        }
+
+        .ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 600px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timer {
+            font-size: 18px;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: #333;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .restart-btn {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: #FF5252;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="timer">Time: <span id="timer">60</span>s</div>
+    </div>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+        <div class="game-over" id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>🐰 How to Play</h3>
+        <p>Use <strong>ARROW KEYS</strong> or <strong>WASD</strong> to move the bunny around and collect carrots! 🥕<br>
+        Collect as many carrots as possible before time runs out!</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameState = {
+            score: 0,
+            timeLeft: 60,
+            gameRunning: true,
+            bunny: {
+                x: 300,
+                y: 200,
+                size: 25,
+                speed: 5
+            },
+            carrots: [],
+            keys: {}
+        };
+
+        // Game timer
+        let gameTimer = setInterval(() => {
+            if (gameState.gameRunning) {
+                gameState.timeLeft--;
+                document.getElementById('timer').textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }
+        }, 1000);
+
+        // Carrot spawning
+        let carrotSpawner = setInterval(() => {
+            if (gameState.gameRunning && gameState.carrots.length < 8) {
+                spawnCarrot();
+            }
+        }, 1500);
+
+        function spawnCarrot() {
+            const carrot = {
+                x: Math.random() * (canvas.width - 30) + 15,
+                y: Math.random() * (canvas.height - 30) + 15,
+                size: 15
+            };
+            gameState.carrots.push(carrot);
+        }
+
+        function drawBunny() {
+            const bunny = gameState.bunny;
+            
+            // Bunny body (white circle)
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(bunny.x, bunny.y, bunny.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bunny ears
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.ellipse(bunny.x - 10, bunny.y - 20, 4, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(bunny.x + 10, bunny.y - 20, 4, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bunny face
+            ctx.fillStyle = '#000';
+            // Eyes
+            ctx.beginPath();
+            ctx.arc(bunny.x - 8, bunny.y - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(bunny.x + 8, bunny.y - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nose
+            ctx.fillStyle = '#FF69B4';
+            ctx.beginPath();
+            ctx.arc(bunny.x, bunny.y + 2, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Tail
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(bunny.x, bunny.y + bunny.size + 5, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawCarrot(carrot) {
+            // Carrot body (orange triangle)
+            ctx.fillStyle = '#FF8C00';
+            ctx.beginPath();
+            ctx.moveTo(carrot.x, carrot.y - carrot.size);
+            ctx.lineTo(carrot.x - carrot.size/2, carrot.y + carrot.size);
+            ctx.lineTo(carrot.x + carrot.size/2, carrot.y + carrot.size);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Carrot top (green leaves)
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.moveTo(carrot.x - 5, carrot.y - carrot.size);
+            ctx.lineTo(carrot.x - 2, carrot.y - carrot.size - 8);
+            ctx.lineTo(carrot.x + 2, carrot.y - carrot.size - 6);
+            ctx.lineTo(carrot.x + 5, carrot.y - carrot.size);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function checkCollisions() {
+            for (let i = gameState.carrots.length - 1; i >= 0; i--) {
+                const carrot = gameState.carrots[i];
+                const dx = gameState.bunny.x - carrot.x;
+                const dy = gameState.bunny.y - carrot.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < gameState.bunny.size + carrot.size) {
+                    gameState.carrots.splice(i, 1);
+                    gameState.score += 10;
+                    document.getElementById('score').textContent = gameState.score;
+                }
+            }
+        }
+
+        function updateBunny() {
+            if (gameState.keys['ArrowUp'] || gameState.keys['w']) {
+                gameState.bunny.y = Math.max(gameState.bunny.size, gameState.bunny.y - gameState.bunny.speed);
+            }
+            if (gameState.keys['ArrowDown'] || gameState.keys['s']) {
+                gameState.bunny.y = Math.min(canvas.height - gameState.bunny.size, gameState.bunny.y + gameState.bunny.speed);
+            }
+            if (gameState.keys['ArrowLeft'] || gameState.keys['a']) {
+                gameState.bunny.x = Math.max(gameState.bunny.size, gameState.bunny.x - gameState.bunny.speed);
+            }
+            if (gameState.keys['ArrowRight'] || gameState.keys['d']) {
+                gameState.bunny.x = Math.min(canvas.width - gameState.bunny.size, gameState.bunny.x + gameState.bunny.speed);
+            }
+        }
+
+        function gameLoop() {
+            if (!gameState.gameRunning) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update game objects
+            updateBunny();
+            checkCollisions();
+            
+            // Draw game objects
+            drawBunny();
+            gameState.carrots.forEach(drawCarrot);
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameState.gameRunning = false;
+            clearInterval(gameTimer);
+            clearInterval(carrotSpawner);
+            
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function restartGame() {
+            gameState = {
+                score: 0,
+                timeLeft: 60,
+                gameRunning: true,
+                bunny: {
+                    x: 300,
+                    y: 200,
+                    size: 25,
+                    speed: 5
+                },
+                carrots: [],
+                keys: {}
+            };
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('timer').textContent = '60';
+            document.getElementById('gameOver').style.display = 'none';
+            
+            clearInterval(gameTimer);
+            clearInterval(carrotSpawner);
+            
+            gameTimer = setInterval(() => {
+                if (gameState.gameRunning) {
+                    gameState.timeLeft--;
+                    document.getElementById('timer').textContent = gameState.timeLeft;
+                    
+                    if (gameState.timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+            
+            carrotSpawner = setInterval(() => {
+                if (gameState.gameRunning && gameState.carrots.length < 8) {
+                    spawnCarrot();
+                }
+            }, 1500);
+            
+            gameLoop();
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key] = false;
+        });
+
+        // Initialize game
+        spawnCarrot();
+        spawnCarrot();
+        gameLoop();
+    </script>
+</body>
+</html>
