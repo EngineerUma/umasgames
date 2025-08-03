@@ -30,8 +30,16 @@ async def index():
     return air.layouts.mvpcss(
         air.H1("Uma's Games"),
         air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy."),
-        *[air.Div(
-            air.H3(date.name),
-            *[air.A(f"{space_pascal(game.stem)} ", href=f"/games/{date.name}/{game.name}") for game in games_from_date(date)]
-        ) for date in dates],
+        *[
+            air.Section(
+                air.H3(date.name),
+                *[
+                    air.Aside(
+                        air.A(f"{space_pascal(game.stem)} ", href=f"/games/{date.name}/{game.name}")
+                    )
+                    for game in games_from_date(date)
+                ]
+            )
+            for date in dates
+        ],
     )
