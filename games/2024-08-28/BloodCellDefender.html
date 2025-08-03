@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Cell Defender: Learn and Play!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #e74c3c;
+        }
+        #game-container {
+            width: 300px;
+            height: 400px;
+            border: 2px solid #3498db;
+            background-color: #ffebee;
+            position: relative;
+            overflow: hidden;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .red-blood-cell {
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+        }
+        .white-blood-cell {
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            color: #3498db;
+            border-radius: 50%;
+        }
+        .germ {
+            background-color: #8e44ad;
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        }
+        .germ::before {
+            content: '🦠';
+            font-size: 20px;
+        }
+        #score, #timer {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #start-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #instructions, #fact-box {
+            margin-top: 20px;
+            text-align: center;
+            max-width: 300px;
+        }
+        #legend {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .good {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .bad {
+            color: #c0392b;
+            font-weight: bold;
+        }
+        #fact-box {
+            background-color: #d5f5e3;
+            padding: 10px;
+            border-radius: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blood Cell Defender: Learn and Play!</h1>
+    <div id="instructions">
+        <p>Protect your body by clicking on the <span class="bad">bad germs</span>! <span class="good">Don't click</span> on the good blood cells.</p>
+        <div id="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e74c3c;"></div>
+                <span class="good">RBC (Good)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffffff; border: 1px solid #3498db;"></div>
+                <span class="good">WBC (Good)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #8e44ad; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);">🦠</div>
+                <span class="bad">Germ (Bad)</span>
+            </div>
+        </div>
+    </div>
+    <div id="game-container"></div>
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 30s</div>
+    <button id="start-button">Start Game</button>
+    <div id="fact-box">Did you know? An adult human body has about 5 liters of blood!</div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const startButton = document.getElementById('start-button');
+        const factBox = document.getElementById('fact-box');
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval;
+        let timerInterval;
+
+        const facts = [
+            "Red blood cells carry oxygen throughout your body.",
+            "White blood cells help fight infections and diseases.",
+            "Your body makes about 2 million new red blood cells every second!",
+            "Germs are tiny organisms that can make you sick.",
+            "Washing your hands helps remove germs and keeps you healthy.",
+            "There are good bacteria in your body that help you digest food.",
+            "Some white blood cells can 'eat' harmful germs!",
+            "Red blood cells live for about 120 days before being replaced.",
+            "Your body has more bacterial cells than human cells!",
+            "Antibiotics can kill bacteria, but not viruses."
+        ];
+
+        function createCell(type) {
+            const cell = document.createElement('div');
+            cell.className = `cell ${type}`;
+            cell.style.left = `${Math.random() * (gameContainer.clientWidth - 40)}px`;
+            cell.style.top = `${Math.random() * (gameContainer.clientHeight - 40)}px`;
+            
+            if (type === 'red-blood-cell') {
+                cell.textContent = 'RBC';
+                cell.title = 'Red Blood Cell: Good! Carries oxygen to your body';
+            } else if (type === 'white-blood-cell') {
+                cell.textContent = 'WBC';
+                cell.title = 'White Blood Cell: Good! Fights infections';
+            } else {
+                cell.title = 'Germ: Bad! Click to remove!';
+            }
+
+            cell.addEventListener('click', () => {
+                if (type === 'germ') {
+                    score += 10;
+                    gameContainer.removeChild(cell);
+                    showMessage('Good job! You removed a bad germ!', '#27ae60');
+                } else {
+                    score -= 5;
+                    showMessage('Oops! That was a good blood cell. Don\'t click on it!', '#c0392b');
+                }
+                scoreElement.textContent = `Score: ${score}`;
+                showRandomFact();
+            });
+
+            gameContainer.appendChild(cell);
+
+            setTimeout(() => {
+                if (gameContainer.contains(cell)) {
+                    gameContainer.removeChild(cell);
+                }
+            }, 2000);
+        }
+
+        function showMessage(text, color) {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.position = 'absolute';
+            message.style.top = '10px';
+            message.style.left = '50%';
+            message.style.transform = 'translateX(-50%)';
+            message.style.backgroundColor = color;
+            message.style.color = 'white';
+            message.style.padding = '5px 10px';
+            message.style.borderRadius = '5px';
+            message.style.zIndex = '100';
+            gameContainer.appendChild(message);
+            setTimeout(() => gameContainer.removeChild(message), 1500);
+        }
+
+        function showRandomFact() {
+            const randomFact = facts[Math.floor(Math.random() * facts.length)];
+            factBox.textContent = randomFact;
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            scoreElement.textContent = 'Score: 0';
+            timerElement.textContent = 'Time: 30s';
+            gameContainer.innerHTML = '';
+            startButton.disabled = true;
+
+            gameInterval = setInterval(() => {
+                const randomNum = Math.random();
+                if (randomNum < 0.4) {
+                    createCell('red-blood-cell');
+                } else if (randomNum < 0.7) {
+                    createCell('white-blood-cell');
+                } else {
+                    createCell('germ');
+                }
+            }, 1000);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            showRandomFact();
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            alert(`Game Over! Your score: ${score}\n\nGreat job learning about blood cells and germs!\nRemember to wash your hands to stay healthy!`);
+            startButton.disabled = false;
+        }
+
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>

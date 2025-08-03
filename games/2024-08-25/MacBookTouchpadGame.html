@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacBook Touchpad Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            display: flex;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #game-area {
+            width: 300px;
+            height: 200px;
+            border: 2px solid #333;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+        #target {
+            width: 50px;
+            height: 50px;
+            background-color: #ff6b6b;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+        }
+        #scrollable {
+            width: 100%;
+            height: 100%;
+            overflow-y: scroll;
+        }
+        #scroll-content {
+            height: 400px;
+            background: linear-gradient(to bottom, #4e54c8, #8f94fb);
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #instructions {
+            width: 250px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin-left: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        #progress {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div>
+            <h1>MacBook Touchpad Game</h1>
+            <p id="instruction">Click the red circle!</p>
+            <div id="game-area">
+                <div id="target"></div>
+            </div>
+            <button id="next-task">Next Task</button>
+            <p id="progress">Task 1 of 7</p>
+        </div>
+        <div id="instructions">
+            <h2>How to do this task:</h2>
+            <p id="how-to"></p>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const target = document.getElementById('target');
+        const instruction = document.getElementById('instruction');
+        const nextTaskButton = document.getElementById('next-task');
+        const howTo = document.getElementById('how-to');
+        const progress = document.getElementById('progress');
+
+        let currentTask = 0;
+        const tasks = [
+            { name: 'click', instruction: 'Click the red circle!', howTo: 'Gently tap the touchpad with one finger.' },
+            { name: 'double-click', instruction: 'Double-click the red circle!', howTo: 'Quickly tap the touchpad twice with one finger.' },
+            { name: 'right-click', instruction: 'Right-click the red circle!', howTo: 'Tap the touchpad with two fingers at once.' },
+            { name: 'drag', instruction: 'Drag the red circle to the right side!', howTo: 'Press and hold the touchpad, then slide your finger to move the circle.' },
+            { name: 'scroll', instruction: 'Scroll down to the bottom!', howTo: 'Place two fingers on the touchpad and slide them up and down.' },
+            { name: 'pinch', instruction: 'Pinch to zoom out the image!', howTo: 'Place two fingers on the touchpad and bring them closer together.' },
+            { name: 'spread', instruction: 'Spread to zoom in the image!', howTo: 'Place two fingers on the touchpad and move them apart.' }
+        ];
+
+        function setRandomPosition(element) {
+            const maxX = gameArea.clientWidth - element.clientWidth;
+            const maxY = gameArea.clientHeight - element.clientHeight;
+            element.style.left = Math.floor(Math.random() * maxX) + 'px';
+            element.style.top = Math.floor(Math.random() * maxY) + 'px';
+        }
+
+        function setupClickTask() {
+            setRandomPosition(target);
+            target.style.cursor = 'pointer';
+            target.onmousedown = () => {
+                alert('Great job! You clicked the circle!');
+                nextTaskButton.style.display = 'inline-block';
+            };
+        }
+
+        function setupDoubleClickTask() {
+            setRandomPosition(target);
+            target.style.cursor = 'pointer';
+            target.ondblclick = () => {
+                alert('Excellent! You double-clicked the circle!');
+                nextTaskButton.style.display = 'inline-block';
+            };
+        }
+
+        function setupRightClickTask() {
+            setRandomPosition(target);
+            target.style.cursor = 'context-menu';
+            target.oncontextmenu = (e) => {
+                e.preventDefault();
+                alert('Well done! You right-clicked the circle!');
+                nextTaskButton.style.display = 'inline-block';
+            };
+        }
+
+        function setupDragTask() {
+            target.style.left = '0px';
+            target.style.top = '75px';
+            target.style.cursor = 'move';
+            
+            let isDragging = false;
+            target.onmousedown = (e) => {
+                isDragging = true;
+            };
+            document.onmousemove = (e) => {
+                if (isDragging) {
+                    const rect = gameArea.getBoundingClientRect();
+                    let newX = e.clientX - rect.left - 25;
+                    newX = Math.max(0, Math.min(newX, gameArea.clientWidth - 50));
+                    target.style.left = newX + 'px';
+                }
+            };
+            document.onmouseup = () => {
+                isDragging = false;
+                if (parseInt(target.style.left) > gameArea.clientWidth - 60) {
+                    alert('Great job! You dragged the circle to the right side!');
+                    nextTaskButton.style.display = 'inline-block';
+                }
+            };
+        }
+
+        function setupScrollTask() {
+            gameArea.innerHTML = '<div id="scrollable"><div id="scroll-content"></div></div>';
+            const scrollable = document.getElementById('scrollable');
+            scrollable.onscroll = () => {
+                if (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight) {
+                    alert('Great job! You scrolled to the bottom!');
+                    nextTaskButton.style.display = 'inline-block';
+                }
+            };
+        }
+
+        function setupPinchTask() {
+            gameArea.innerHTML = '<img id="zoomable" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%234e54c8\'/%3E%3Ccircle cx=\'150\' cy=\'100\' r=\'80\' fill=\'%238f94fb\'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">';
+            const zoomable = document.getElementById('zoomable');
+            let scale = 1;
+            gameArea.onwheel = (e) => {
+                e.preventDefault();
+                scale += e.deltaY * -0.01;
+                scale = Math.min(Math.max(0.5, scale), 1);
+                zoomable.style.transform = `scale(${scale})`;
+                if (scale <= 0.6) {
+                    alert('Great job! You zoomed out the image!');
+                    nextTaskButton.style.display = 'inline-block';
+                }
+            };
+        }
+
+        function setupSpreadTask() {
+            gameArea.innerHTML = '<img id="zoomable" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%234e54c8\'/%3E%3Ccircle cx=\'150\' cy=\'100\' r=\'80\' fill=\'%238f94fb\'/%3E%3C/svg%3E" style="width: 100%; height: 100%; object-fit: cover;">';
+            const zoomable = document.getElementById('zoomable');
+            let scale = 1;
+            gameArea.onwheel = (e) => {
+                e.preventDefault();
+                scale += e.deltaY * -0.01;
+                scale = Math.min(Math.max(1, scale), 2);
+                zoomable.style.transform = `scale(${scale})`;
+                if (scale >= 1.4) {
+                    alert('Great job! You zoomed in the image!');
+                    nextTaskButton.style.display = 'inline-block';
+                }
+            };
+        }
+
+        function nextTask() {
+            currentTask++;
+            if (currentTask >= tasks.length) {
+                gameArea.innerHTML = '<h2>Congratulations! You\'ve completed all tasks!</h2>';
+                instruction.textContent = 'Game Over';
+                nextTaskButton.style.display = 'none';
+                howTo.textContent = '';
+                progress.textContent = 'All tasks completed!';
+                return;
+            }
+            
+            nextTaskButton.style.display = 'none';
+            instruction.textContent = tasks[currentTask].instruction;
+            howTo.textContent = tasks[currentTask].howTo;
+            progress.textContent = `Task ${currentTask + 1} of ${tasks.length}`;
+            
+            switch (tasks[currentTask].name) {
+                case 'click':
+                    setupClickTask();
+                    break;
+                case 'double-click':
+                    setupDoubleClickTask();
+                    break;
+                case 'right-click':
+                    setupRightClickTask();
+                    break;
+                case 'drag':
+                    setupDragTask();
+                    break;
+                case 'scroll':
+                    setupScrollTask();
+                    break;
+                case 'pinch':
+                    setupPinchTask();
+                    break;
+                case 'spread':
+                    setupSpreadTask();
+                    break;
+            }
+        }
+
+        nextTaskButton.onclick = nextTask;
+        setupClickTask();
+        howTo.textContent = tasks[0].howTo;
+    </script>
+</body>
+</html>

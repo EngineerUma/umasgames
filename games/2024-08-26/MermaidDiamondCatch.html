@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid's Diamond Catch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #87CEEB;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-area {
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(to bottom, #00BFFF 0%, #1E90FF 100%);
+            border: 2px solid #4682B4;
+            position: relative;
+            overflow: hidden;
+        }
+        .mermaid {
+            position: absolute;
+            font-size: 40px;
+            transition: left 0.2s;
+            user-select: none;
+        }
+        .item {
+            position: absolute;
+            font-size: 24px;
+        }
+        #score {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        #mermaid-selector {
+            margin-top: 10px;
+        }
+        .mermaid-button {
+            font-size: 24px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mermaid's Diamond Catch</h1>
+    <div id="game-area">
+        <div class="mermaid" id="mermaid1" style="bottom: 10px;">🧜‍♀️</div>
+        <div class="mermaid" id="mermaid2" style="bottom: 60px;">🧜</div>
+        <div class="mermaid" id="mermaid3" style="bottom: 110px;">🧜‍♂️</div>
+    </div>
+    <div id="score">Score: 0</div>
+    <div id="mermaid-selector">
+        <span class="mermaid-button" data-mermaid="mermaid1">🧜‍♀️</span>
+        <span class="mermaid-button" data-mermaid="mermaid2">🧜</span>
+        <span class="mermaid-button" data-mermaid="mermaid3">🧜‍♂️</span>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const scoreElement = document.getElementById('score');
+        const items = ['💎', '🗑️'];
+        let score = 0;
+        let activeMermaid = 'mermaid1';
+
+        const mermaids = {
+            mermaid1: document.getElementById('mermaid1'),
+            mermaid2: document.getElementById('mermaid2'),
+            mermaid3: document.getElementById('mermaid3')
+        };
+
+        Object.values(mermaids).forEach(mermaid => {
+            mermaid.style.left = (gameArea.offsetWidth / 2 - 20) + 'px';
+        });
+
+        document.querySelectorAll('.mermaid-button').forEach(button => {
+            button.addEventListener('click', () => {
+                activeMermaid = button.dataset.mermaid;
+            });
+        });
+
+        gameArea.addEventListener('mousemove', (e) => {
+            const newX = e.clientX - gameArea.getBoundingClientRect().left - 20;
+            mermaids[activeMermaid].style.left = Math.max(0, Math.min(newX, gameArea.offsetWidth - 40)) + 'px';
+        });
+
+        gameArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const newX = e.touches[0].clientX - gameArea.getBoundingClientRect().left - 20;
+            mermaids[activeMermaid].style.left = Math.max(0, Math.min(newX, gameArea.offsetWidth - 40)) + 'px';
+        });
+
+        function createItem() {
+            const item = document.createElement('div');
+            item.className = 'item';
+            item.textContent = items[Math.floor(Math.random() * items.length)];
+            item.style.left = Math.random() * (gameArea.offsetWidth - 30) + 'px';
+            item.style.top = '-30px';
+            gameArea.appendChild(item);
+
+            let startTime = performance.now();
+            function animateItem(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = elapsed / 3000; // 3 seconds to fall
+                
+                if (progress < 1) {
+                    item.style.top = (progress * (gameArea.offsetHeight + 30)) + 'px';
+                    checkCollision(item);
+                    requestAnimationFrame(animateItem);
+                } else {
+                    item.remove();
+                }
+            }
+            requestAnimationFrame(animateItem);
+        }
+
+        function checkCollision(item) {
+            Object.values(mermaids).forEach(mermaid => {
+                const mermaidRect = mermaid.getBoundingClientRect();
+                const itemRect = item.getBoundingClientRect();
+
+                if (
+                    mermaidRect.left < itemRect.right &&
+                    mermaidRect.right > itemRect.left &&
+                    mermaidRect.top < itemRect.bottom &&
+                    mermaidRect.bottom > itemRect.top
+                ) {
+                    if (item.textContent === '💎') {
+                        score++;
+                        scoreElement.textContent = `Score: ${score}`;
+                        item.remove();
+                    } else {
+                        score = Math.max(0, score - 1);
+                        scoreElement.textContent = `Score: ${score}`;
+                        item.remove();
+                    }
+                }
+            });
+        }
+
+        function startGame() {
+            setInterval(createItem, 1000);
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

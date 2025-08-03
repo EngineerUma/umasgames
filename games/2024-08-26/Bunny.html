@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talking Bunny Pet Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .pet-container {
+            position: relative;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+        .pet {
+            font-size: 100px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.3s ease;
+        }
+        .speech-bubble {
+            position: absolute;
+            background-color: #fff;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 200px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #fff transparent;
+            transform: translateX(-50%);
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .stat-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            margin: 10px auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .stat-fill {
+            height: 100%;
+            width: 50%;
+            transition: width 0.3s ease;
+        }
+        #hunger-fill { background-color: #ff9900; }
+        #happiness-fill { background-color: #ff66aa; }
+        #energy-fill { background-color: #66ccff; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="pet-container">
+            <div id="speech-bubble" class="speech-bubble"></div>
+            <div id="pet" class="pet">🐰</div>
+        </div>
+        <div>
+            <button onclick="feed()">Feed</button>
+            <button onclick="play()">Play</button>
+            <button onclick="sleep()">Sleep</button>
+        </div>
+        <div>Hunger:</div>
+        <div class="stat-bar"><div id="hunger-fill" class="stat-fill"></div></div>
+        <div>Happiness:</div>
+        <div class="stat-bar"><div id="happiness-fill" class="stat-fill"></div></div>
+        <div>Energy:</div>
+        <div class="stat-bar"><div id="energy-fill" class="stat-fill"></div></div>
+        <div id="status">Your bunny is happy!</div>
+    </div>
+
+    <script>
+        let hunger = 50;
+        let happiness = 50;
+        let energy = 50;
+
+        function updateStats() {
+            document.getElementById('hunger-fill').style.width = hunger + '%';
+            document.getElementById('happiness-fill').style.width = happiness + '%';
+            document.getElementById('energy-fill').style.width = energy + '%';
+        }
+
+        function updateStatus() {
+            let status = document.getElementById('status');
+            if (hunger <= 20 || happiness <= 20 || energy <= 20) {
+                status.textContent = "Your bunny needs attention!";
+            } else if (hunger > 80 && happiness > 80 && energy > 80) {
+                status.textContent = "Your bunny is thriving!";
+            } else {
+                status.textContent = "Your bunny is doing okay.";
+            }
+            updateStats();
+        }
+
+        function animatePet(emoji, duration) {
+            const pet = document.getElementById('pet');
+            pet.innerHTML = emoji;
+            pet.style.transform = 'translateX(-50%) scale(1.2)';
+            setTimeout(() => {
+                pet.innerHTML = '🐰';
+                pet.style.transform = 'translateX(-50%) scale(1)';
+            }, duration);
+        }
+
+        function showMessage(msg) {
+            const bubble = document.getElementById('speech-bubble');
+            bubble.textContent = msg;
+            bubble.style.opacity = '1';
+            setTimeout(() => {
+                bubble.style.opacity = '0';
+            }, 2000);
+        }
+
+        function feed() {
+            hunger = Math.min(hunger + 20, 100);
+            energy = Math.max(energy - 5, 0);
+            animatePet('🐰🥕', 500);
+            showMessage("Yum yum! I love carrots!");
+            updateStatus();
+        }
+
+        function play() {
+            happiness = Math.min(happiness + 20, 100);
+            hunger = Math.max(hunger - 10, 0);
+            energy = Math.max(energy - 15, 0);
+            animatePet('🐰🎾', 500);
+            showMessage("Wheee! This is fun!");
+            updateStatus();
+        }
+
+        function sleep() {
+            energy = Math.min(energy + 40, 100);
+            hunger = Math.max(hunger - 5, 0);
+            animatePet('😴', 1000);
+            showMessage("Zzz... Nap time!");
+            updateStatus();
+        }
+
+        setInterval(() => {
+            hunger = Math.max(hunger - 1, 0);
+            happiness = Math.max(happiness - 1, 0);
+            energy = Math.max(energy - 1, 0);
+            updateStatus();
+        }, 2000);
+
+        updateStatus();
+    </script>
+</body>
+</html>

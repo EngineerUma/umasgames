@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colour Mixing Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #game-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        #color-palette {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .color-button {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        .color-button:hover {
+            transform: scale(1.1);
+        }
+        #mixing-area {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+        #result {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        #reset {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #reset:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Colour Mixing Adventure</h1>
+    <div id="game-container">
+        <div id="color-palette">
+            <button class="color-button" style="background-color: red;" onclick="addColor('red')"></button>
+            <button class="color-button" style="background-color: blue;" onclick="addColor('blue')"></button>
+            <button class="color-button" style="background-color: yellow;" onclick="addColor('yellow')"></button>
+            <button class="color-button" style="background-color: white; border: 1px solid #ccc;" onclick="addColor('white')"></button>
+        </div>
+        <div id="mixing-area"></div>
+        <div id="result">Mix colours and see what happens!</div>
+        <button id="reset" onclick="resetMixingArea()">Reset</button>
+    </div>
+
+    <script>
+        let currentColors = [];
+        const mixingArea = document.getElementById('mixing-area');
+        const result = document.getElementById('result');
+
+        function addColor(color) {
+            currentColors.push(color);
+            updateMixingArea();
+        }
+
+        function updateMixingArea() {
+            if (currentColors.length === 1) {
+                mixingArea.style.backgroundColor = currentColors[0];
+                result.textContent = `You've added ${currentColors[0]}!`;
+            } else if (currentColors.length === 2) {
+                const mixedColor = mixColors(currentColors[0], currentColors[1]);
+                mixingArea.style.backgroundColor = mixedColor;
+                result.textContent = `You've mixed ${currentColors[0]} and ${currentColors[1]} to create ${mixedColor}!`;
+            } else if (currentColors.length === 3) {
+                if (currentColors.includes('white')) {
+                    const baseColors = currentColors.filter(color => color !== 'white');
+                    const mixedColor = mixColors(baseColors[0], baseColors[1]);
+                    const lightColor = lightenColor(mixedColor);
+                    mixingArea.style.backgroundColor = lightColor;
+                    result.textContent = `You've created ${lightColor}!`;
+                } else {
+                    mixingArea.style.backgroundColor = 'brown';
+                    result.textContent = "Wow! You've mixed three colours to create brown - Mummy's favourite colour!";
+                }
+            } else if (currentColors.length === 4) {
+                mixingArea.style.backgroundColor = 'tan';
+                result.textContent = "You've made light brown! It's like sand at the beach.";
+            } else if (currentColors.length === 5) {
+                mixingArea.style.backgroundColor = 'sienna';
+                result.textContent = "You've created a reddish-brown color! It's called auburn.";
+            } else if (currentColors.length === 6) {
+                mixingArea.style.backgroundColor = 'goldenrod';
+                result.textContent = "You've made a golden brown color! It's like amber or honey.";
+            } else if (currentColors.length === 7) {
+                mixingArea.style.backgroundColor = '#708090';
+                result.textContent = "You've created a muted earthy color! It's like slate brown or taupe.";
+            }
+        }
+
+        function mixColors(color1, color2) {
+            if ((color1 === 'red' && color2 === 'blue') || (color1 === 'blue' && color2 === 'red')) {
+                return 'purple';
+            } else if ((color1 === 'red' && color2 === 'yellow') || (color1 === 'yellow' && color2 === 'red')) {
+                return 'orange';
+            } else if ((color1 === 'blue' && color2 === 'yellow') || (color1 === 'yellow' && color2 === 'blue')) {
+                return 'green';
+            } else if ((color1 === 'white' && color2 === 'yellow') || (color1 === 'yellow' && color2 === 'white')) {
+                return 'lightyellow';
+            } else if ((color1 === 'tan' && color2 === 'red') || (color1 === 'red' && color2 === 'tan')) {
+                return 'sienna';
+            } else if ((color1 === 'sienna' && color2 === 'yellow') || (color1 === 'yellow' && color2 === 'sienna')) {
+                return 'goldenrod';
+            } else if ((color1 === 'goldenrod' && color2 === 'blue') || (color1 === 'blue' && color2 === 'goldenrod')) {
+                return '#708090'; // slate gray (representing slate brown)
+            } else if (color1 === 'white' || color2 === 'white') {
+                return lightenColor(color1 === 'white' ? color2 : color1);
+            }
+            return color1;
+        }
+
+        function lightenColor(color) {
+            switch (color) {
+                case 'red': return 'pink';
+                case 'blue': return 'lightblue';
+                case 'yellow': return 'lightyellow';
+                case 'purple': return 'lavender';
+                case 'orange': return 'peach';
+                case 'green': return 'lightgreen';
+                case 'brown': return 'tan';
+                default: return color;
+            }
+        }
+
+        function resetMixingArea() {
+            currentColors = [];
+            mixingArea.style.backgroundColor = 'white';
+            result.textContent = 'Mix colours and see what happens!';
+        }
+    </script>
+</body>
+</html>

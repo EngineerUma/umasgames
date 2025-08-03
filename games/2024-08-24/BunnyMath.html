@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Math</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #c2e0ff;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+        }
+        h1 {
+            color: #ff69b4;
+        }
+        #bunny {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        #problem {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        input {
+            font-size: 18px;
+            padding: 5px;
+            width: 100px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Bunny Math</h1>
+        <div id="bunny">🐰</div>
+        <div id="problem"></div>
+        <input type="number" id="answer" placeholder="Your answer">
+        <button onclick="checkAnswer()">Hop to it!</button>
+        <div id="result"></div>
+        <div id="score">Carrots: 0</div>
+    </div>
+
+    <script>
+        let num1, num2, operator, correctAnswer;
+        let carrots = 0;
+
+        function generateProblem() {
+            num1 = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            operator = ['+', '-'][Math.floor(Math.random() * 2)];
+            
+            if (operator === '-' && num2 > num1) {
+                [num1, num2] = [num2, num1];
+            }
+
+            correctAnswer = operator === '+' ? num1 + num2 : num1 - num2;
+            document.getElementById('problem').textContent = `${num1} ${operator} ${num2} = ?`;
+            document.getElementById('answer').value = '';
+            document.getElementById('result').textContent = '';
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const resultElement = document.getElementById('result');
+            
+            if (userAnswer === correctAnswer) {
+                resultElement.textContent = 'Correct! Bunny is happy! 🎉🐰';
+                carrots++;
+            } else {
+                resultElement.textContent = `Oops! The correct answer is ${correctAnswer}. Try again! 🥕`;
+            }
+
+            document.getElementById('score').textContent = `Carrots: ${carrots}`;
+            setTimeout(generateProblem, 2000);
+        }
+
+        generateProblem();
+    </script>
+</body>
+</html>

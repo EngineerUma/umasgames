@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Shining Symmetry Drawing</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #fff0f5; }
+        h1 { color: #ff69b4; }
+        canvas { border: 2px solid #ffd700; border-radius: 10px; }
+        button { 
+            margin: 5px; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .color-btn { color: white; }
+        #pinkBtn { background-color: #ff69b4; }
+        #purpleBtn { background-color: #8a2be2; }
+        #goldBtn { background-color: #ffd700; color: black; }
+        #lavenderBtn { background-color: #e6e6fa; color: black; }
+        #peachBtn { background-color: #ffdab9; color: black; }
+        #clearBtn { background-color: #ff4500; color: white; }
+        #sparkleBtn { background-color: #00ced1; color: white; }
+        #glitterBtn { background-color: #ff1493; color: white; }
+        #shineBtn { background-color: #ffd700; color: black; }
+    </style>
+</head>
+<body>
+    <h1>Magical Shining Symmetry Drawing</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <br>
+    <button id="dotBtn">Dot</button>
+    <button id="lineBtn">Line</button>
+    <button id="heartBtn">Heart</button>
+    <button id="sparkleBtn">✨ Sparkle</button>
+    <button id="glitterBtn">🌟 Glitter</button>
+    <button id="shineBtn">💫 Shine</button>
+    <br>
+    <button id="pinkBtn" class="color-btn">Pink</button>
+    <button id="purpleBtn" class="color-btn">Purple</button>
+    <button id="goldBtn" class="color-btn">Gold</button>
+    <button id="lavenderBtn" class="color-btn">Lavender</button>
+    <button id="peachBtn" class="color-btn">Peach</button>
+    <br>
+    <button id="clearBtn">Clear</button>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let currentColor = '#ff69b4';  // Default to pink
+        let currentTool = 'dot';
+        let shineIntervals = [];
+
+        function draw(x, y) {
+            ctx.fillStyle = ctx.strokeStyle = currentColor;
+            
+            if (currentTool === 'dot') {
+                drawDot(x, y);
+                drawDot(canvas.width - x, y);
+            } else if (currentTool === 'line') {
+                drawLine(200, 200, x, y);
+                drawLine(200, 200, canvas.width - x, y);
+            } else if (currentTool === 'heart') {
+                drawHeart(x, y);
+                drawHeart(canvas.width - x, y);
+            } else if (currentTool === 'sparkle') {
+                drawSparkle(x, y);
+                drawSparkle(canvas.width - x, y);
+            } else if (currentTool === 'glitter') {
+                drawGlitter(x, y);
+                drawGlitter(canvas.width - x, y);
+            } else if (currentTool === 'shine') {
+                startShine(x, y);
+                startShine(canvas.width - x, y);
+            }
+        }
+
+        function drawDot(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        function drawHeart(x, y) {
+            const size = 20;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x - size/2, y - size/2, x - size, y + size/3, x, y + size);
+            ctx.bezierCurveTo(x + size, y + size/3, x + size/2, y - size/2, x, y);
+            ctx.fill();
+        }
+
+        function drawSparkle(x, y) {
+            const size = 10;
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                const angle = (Math.PI / 4) * i;
+                ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawGlitter(x, y) {
+            for (let i = 0; i < 30; i++) {
+                const dx = (Math.random() - 0.5) * 30;
+                const dy = (Math.random() - 0.5) * 30;
+                const size = Math.random() * 2 + 0.5;
+                ctx.beginPath();
+                ctx.arc(x + dx, y + dy, size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 0.7 + 0.3})`;
+                ctx.fill();
+            }
+        }
+
+        function startShine(x, y) {
+            let radius = 0;
+            let growing = true;
+            const interval = setInterval(() => {
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, 30);
+                gradient.addColorStop(0, `rgba(255, 255, 255, 0.8)`);
+                gradient.addColorStop(radius / 30, `rgba(255, 255, 255, 0.5)`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                if (growing) {
+                    radius += 0.5;
+                    if (radius >= 30) growing = false;
+                } else {
+                    radius -= 0.5;
+                    if (radius <= 0) growing = true;
+                }
+            }, 50);
+            shineIntervals.push(interval);
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            draw(x, y);
+        });
+
+        document.getElementById('dotBtn').onclick = () => currentTool = 'dot';
+        document.getElementById('lineBtn').onclick = () => currentTool = 'line';
+        document.getElementById('heartBtn').onclick = () => currentTool = 'heart';
+        document.getElementById('sparkleBtn').onclick = () => currentTool = 'sparkle';
+        document.getElementById('glitterBtn').onclick = () => currentTool = 'glitter';
+        document.getElementById('shineBtn').onclick = () => currentTool = 'shine';
+        document.getElementById('pinkBtn').onclick = () => currentColor = '#ff69b4';
+        document.getElementById('purpleBtn').onclick = () => currentColor = '#8a2be2';
+        document.getElementById('goldBtn').onclick = () => currentColor = '#ffd700';
+        document.getElementById('lavenderBtn').onclick = () => currentColor = '#e6e6fa';
+        document.getElementById('peachBtn').onclick = () => currentColor = '#ffdab9';
+        document.getElementById('clearBtn').onclick = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            shineIntervals.forEach(clearInterval);
+            shineIntervals = [];
+        };
+    </script>
+</body>
+</html>

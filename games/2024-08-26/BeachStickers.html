@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Scene with Stickers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+        #beach-scene {
+            width: 300px;
+            height: 200px;
+            border: 2px solid #4682b4;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.5s ease;
+        }
+        .sticker {
+            position: absolute;
+            font-size: 30px;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tap to Change Scene and Add Stickers!</h1>
+    <div id="beach-scene"></div>
+
+    <script>
+        const beachScene = document.getElementById('beach-scene');
+        const scenes = [
+            'linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #F0E68C 60%, #F0E68C 100%)', // Sunny day
+            'linear-gradient(to bottom, #FF7F50 0%, #FFB6C1 60%, #F0E68C 60%, #F0E68C 100%)', // Sunset
+            'linear-gradient(to bottom, #191970 0%, #191970 60%, #F0E68C 60%, #F0E68C 100%)', // Night
+            'linear-gradient(to bottom, #708090 0%, #708090 60%, #F0E68C 60%, #F0E68C 100%)', // Cloudy day
+            'linear-gradient(to bottom, #00BFFF 0%, #00BFFF 60%, #1E90FF 60%, #1E90FF 100%)' // Ocean view
+        ];
+        const stickers = ['🌴', '🏖️', '🐚', '🦀', '🐠', '🌺', '🏄‍♀️', '🐬', '⛱️', '🪸', '🐙', '🦞'];
+        let currentScene = 0;
+
+        function changeScene() {
+            currentScene = (currentScene + 1) % scenes.length;
+            beachScene.style.background = scenes[currentScene];
+        }
+
+        function addSticker(e) {
+            const rect = beachScene.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if the click is in the bottom 40% of the scene (sand/water area)
+            if (y > rect.height * 0.6) {
+                const sticker = document.createElement('div');
+                sticker.className = 'sticker';
+                sticker.textContent = stickers[Math.floor(Math.random() * stickers.length)];
+                sticker.style.left = `${x - 15}px`;
+                sticker.style.top = `${y - 15}px`;
+                beachScene.appendChild(sticker);
+            } else {
+                changeScene();
+            }
+        }
+
+        beachScene.addEventListener('click', addSticker);
+        beachScene.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            addSticker(e.touches[0]);
+        });
+
+        // Initialize the first scene
+        changeScene();
+    </script>
+</body>
+</html>

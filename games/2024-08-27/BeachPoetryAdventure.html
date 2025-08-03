@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Poetry Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="600" fill="%2387CEEB"/><rect y="600" width="1000" height="400" fill="%23F4A460"/><circle cx="850" cy="150" r="80" fill="%23FFD700"/></svg>');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        #game-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 400px;
+        }
+        h1 {
+            color: #0077be;
+        }
+        #poem-display {
+            font-style: italic;
+            margin: 20px 0;
+            min-height: 150px;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #0077be;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #005f9e;
+        }
+        #word-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .word-option {
+            background-color: #e6f3ff;
+            border: 1px solid #0077be;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .word-option:hover {
+            background-color: #b3d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Beach Poetry Adventure</h1>
+        <p>Create a beautiful beach poem by choosing words and phrases!</p>
+        <div id="poem-display"></div>
+        <div id="word-options"></div>
+        <button id="next-line">Next Line</button>
+        <button id="finish-poem">Finish Poem</button>
+        <button id="start-over">Start Over</button>
+        <button id="read-poem">Read Poem</button>
+    </div>
+
+    <script>
+        const poemDisplay = document.getElementById('poem-display');
+        const wordOptions = document.getElementById('word-options');
+        const nextLineButton = document.getElementById('next-line');
+        const finishPoemButton = document.getElementById('finish-poem');
+        const startOverButton = document.getElementById('start-over');
+        const readPoemButton = document.getElementById('read-poem');
+
+        let currentPoem = [];
+        let currentLine = 0;
+
+        const poemStructure = [
+            {prompt: "Describe the sand:", options: ["Soft and warm", "Golden and fine", "Sparkling in the sun"]},
+            {prompt: "What do you see in the water?", options: ["Crashing waves", "Gentle ripples", "Crystal clear blue"]},
+            {prompt: "What's in the sky?", options: ["Fluffy white clouds", "Seagulls soaring high", "A bright yellow sun"]},
+            {prompt: "What can you hear?", options: ["Seashells whispering", "Children's laughter", "Waves singing"]},
+            {prompt: "What beach activity do you see?", options: ["Building sandcastles", "Flying colorful kites", "Playing volleyball"]},
+            {prompt: "What are people doing in the water?", options: ["Surfing big waves", "Splashing and swimming", "Snorkeling with fish"]},
+            {prompt: "What beach snack can you taste?", options: ["Salty popcorn", "Sweet ice cream", "Juicy watermelon"]},
+            {prompt: "How does the beach look as the day ends?", options: ["Sunset paints the sky", "Bonfires start to glow", "Stars twinkle above"]},
+            {prompt: "How do you feel at the end of the day?", options: ["Happy and tired", "Calm and peaceful", "Excited for tomorrow"]}
+        ];
+
+        function displayPoem() {
+            poemDisplay.textContent = currentPoem.join('\n');
+        }
+
+        function displayWordOptions(lineOptions) {
+            wordOptions.innerHTML = `<p>${lineOptions.prompt}</p>`;
+            lineOptions.options.forEach(option => {
+                const wordElement = document.createElement('span');
+                wordElement.className = 'word-option';
+                wordElement.textContent = option;
+                wordElement.onclick = () => {
+                    currentPoem[currentLine] = option;
+                    displayPoem();
+                    wordOptions.innerHTML = '';
+                    currentLine++;
+                    if (currentLine < poemStructure.length) {
+                        displayWordOptions(poemStructure[currentLine]);
+                    } else {
+                        finishPoem();
+                    }
+                };
+                wordOptions.appendChild(wordElement);
+            });
+        }
+
+        function nextLine() {
+            if (currentLine < poemStructure.length) {
+                displayWordOptions(poemStructure[currentLine]);
+            } else {
+                finishPoem();
+            }
+        }
+
+        function finishPoem() {
+            wordOptions.innerHTML = '';
+            nextLineButton.style.display = 'none';
+            finishPoemButton.style.display = 'none';
+            readPoemButton.style.display = 'inline-block';
+            alert("Wonderful! You've created a beautiful beach poem!");
+        }
+
+        function startOver() {
+            currentPoem = [];
+            currentLine = 0;
+            displayPoem();
+            wordOptions.innerHTML = '';
+            nextLineButton.style.display = 'inline-block';
+            finishPoemButton.style.display = 'inline-block';
+            readPoemButton.style.display = 'none';
+            nextLine();
+        }
+
+        function readPoem() {
+            const speech = new SpeechSynthesisUtterance(currentPoem.join('. '));
+            window.speechSynthesis.speak(speech);
+        }
+
+        nextLineButton.onclick = nextLine;
+        finishPoemButton.onclick = finishPoem;
+        startOverButton.onclick = startOver;
+        readPoemButton.onclick = readPoem;
+
+        // Start the game
+        startOver();
+    </script>
+</body>
+</html>

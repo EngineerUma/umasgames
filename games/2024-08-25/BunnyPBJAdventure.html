@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bunny's PB&J Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #gameArea {
+            width: 80%;
+            max-width: 300px;
+            height: 400px;
+            border: 3px solid #8B4513;
+            border-radius: 10px;
+            margin: 20px auto;
+            position: relative;
+            background-color: #90EE90;
+            overflow: hidden;
+        }
+        #bunny {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 80px;
+        }
+        #sandwich {
+            width: 80%;
+            height: 100px;
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            margin: 20px auto;
+            position: relative;
+            background-color: #F4A460;
+            overflow: hidden;
+        }
+        .layer {
+            width: 100%;
+            height: 20px;
+            position: absolute;
+            left: 0;
+        }
+        button {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 10px auto;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bunny's PB&J Adventure</h1>
+    <div id="gameArea">
+        <div id="sandwich"></div>
+        <div id="bunny">🐰</div>
+    </div>
+    <button onclick="addLayer('peanut butter')">Add Peanut Butter</button>
+    <button onclick="addLayer('jelly')">Add Jelly</button>
+    <button onclick="eatSandwich()">Eat Sandwich</button>
+    <div id="message"></div>
+
+    <script>
+        let layers = 0;
+        let bites = 0;
+        const sandwich = document.getElementById('sandwich');
+        const bunny = document.getElementById('bunny');
+        const message = document.getElementById('message');
+
+        function addLayer(type) {
+            if (layers < 5) {
+                const layer = document.createElement('div');
+                layer.className = 'layer';
+                layer.style.bottom = `${layers * 20}px`;
+                layer.style.backgroundColor = type === 'peanut butter' ? '#D2691E' : '#8B0000';
+                sandwich.appendChild(layer);
+                layers++;
+                message.textContent = `Added ${type}!`;
+            } else {
+                message.textContent = "Your sandwich is full!";
+            }
+        }
+
+        function eatSandwich() {
+            if (layers > 0) {
+                bunny.style.fontSize = '100px';
+                bunny.innerHTML = '🐰😋';
+                sandwich.style.height = `${sandwich.offsetHeight - 20}px`;
+                layers--;
+                bites++;
+                message.textContent = `Yum! Bite ${bites} taken.`;
+                
+                if (layers === 0) {
+                    message.textContent = "All gone! Make a new sandwich?";
+                    setTimeout(() => {
+                        bunny.style.fontSize = '80px';
+                        bunny.innerHTML = '🐰';
+                        sandwich.style.height = '100px';
+                        bites = 0;
+                    }, 1500);
+                }
+            } else {
+                message.textContent = "Make a sandwich first!";
+            }
+        }
+    </script>
+</body>
+</html>

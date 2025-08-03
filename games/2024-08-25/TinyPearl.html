@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Pearl's Magical Shell Adventure</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #e6f3ff;
+            color: #4a4a4a;
+            text-align: center;
+        }
+        #game-container {
+            background-color: #fff9e6;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 182, 193, 0.5);
+        }
+        h1 {
+            color: #ff69b4;
+            font-size: 2.5em;
+            text-shadow: 2px 2px #ffe4e1;
+        }
+        #story {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #ffa07a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #ff7f50;
+            transform: scale(1.1);
+        }
+        #pearl-house {
+            font-size: 5em;
+            margin: 20px 0;
+            position: relative;
+            display: inline-block;
+        }
+        #tiny-mermaid {
+            font-size: 0.3em;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Tiny Pearl's Magical Shell Adventure</h1>
+        <div id="pearl-house">🐚<span id="tiny-mermaid">🧜‍♀️</span></div>
+        <div id="story"></div>
+        <div id="choices"></div>
+    </div>
+
+    <script>
+        const gameStates = {
+            start: {
+                text: "Tiny Pearl, a magical mermaid, lives in a beautiful pearl shell. One day, she decides to explore the big ocean. Where should she go first?",
+                choices: [
+                    { text: "Coral Reef Playground", nextState: "reef" },
+                    { text: "Seaweed Forest", nextState: "forest" }
+                ]
+            },
+            reef: {
+                text: "Pearl finds colorful fish playing hide-and-seek in the coral. They invite her to join, but she hears mysterious singing in the distance.",
+                choices: [
+                    { text: "Play with Fish Friends", nextState: "playfish" },
+                    { text: "Follow the Singing", nextState: "singing" }
+                ]
+            },
+            forest: {
+                text: "In the seaweed forest, Pearl meets a wise old turtle who tells her about a magical current that can take her on an adventure.",
+                choices: [
+                    { text: "Ride the Magic Current", nextState: "current" },
+                    { text: "Ask Turtle for More Stories", nextState: "turtlestory" }
+                ]
+            },
+            playfish: {
+                text: "Pearl has so much fun playing with her new fish friends! They show her a secret treasure chest full of shiny bubbles.",
+                choices: [
+                    { text: "New Adventure!", nextState: "start" }
+                ]
+            },
+            singing: {
+                text: "The singing leads Pearl to a group of baby whales learning whale songs. They're so happy to have a tiny audience!",
+                choices: [
+                    { text: "New Adventure!", nextState: "start" }
+                ]
+            },
+            current: {
+                text: "The magical current takes Pearl on a swirly ride to a rainbow cave filled with glowing crystals. What a spectacular sight!",
+                choices: [
+                    { text: "New Adventure!", nextState: "start" }
+                ]
+            },
+            turtlestory: {
+                text: "The turtle tells Pearl about the time he raced with a seahorse. Pearl giggles at the silly story all the way home to her shell.",
+                choices: [
+                    { text: "New Adventure!", nextState: "start" }
+                ]
+            }
+        };
+
+        let currentState = "start";
+
+        function updateGame() {
+            const state = gameStates[currentState];
+            document.getElementById("story").innerText = state.text;
+            
+            const choicesDiv = document.getElementById("choices");
+            choicesDiv.innerHTML = "";
+            state.choices.forEach(choice => {
+                const button = document.createElement("button");
+                button.innerText = choice.text;
+                button.onclick = () => {
+                    currentState = choice.nextState;
+                    updateGame();
+                };
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        updateGame();
+    </script>
+</body>
+</html>

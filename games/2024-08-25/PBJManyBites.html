@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile PB&J Maker with Many Bites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #sandwich {
+            width: 80%;
+            max-width: 300px;
+            height: 150px;
+            border: 3px solid #8B4513;
+            border-radius: 10px;
+            margin: 20px auto;
+            position: relative;
+            background-color: #F4A460;
+            overflow: hidden;
+        }
+        .layer {
+            width: 100%;
+            height: 30px;
+            position: absolute;
+            left: 0;
+        }
+        .bite {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+        }
+        button {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 10px auto;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile PB&J Maker with Many Bites</h1>
+    <div id="sandwich"></div>
+    <button onclick="addLayer('peanut butter')">Add Peanut Butter</button>
+    <button onclick="addLayer('jelly')">Add Jelly</button>
+    <button onclick="takeBite()">Take a Bite</button>
+    <div id="message"></div>
+
+    <script>
+        let layers = 0;
+        let bites = 0;
+        const sandwich = document.getElementById('sandwich');
+        const message = document.getElementById('message');
+        const maxBites = 50;  // Increased maximum bites
+
+        function addLayer(type) {
+            if (layers < 5) {
+                const layer = document.createElement('div');
+                layer.className = 'layer';
+                layer.style.bottom = `${layers * 30}px`;
+                layer.style.backgroundColor = type === 'peanut butter' ? '#D2691E' : '#8B0000';
+                sandwich.appendChild(layer);
+                layers++;
+                message.textContent = `Added ${type}!`;
+            } else {
+                message.textContent = "Your sandwich is full!";
+            }
+        }
+
+        function takeBite() {
+            if (layers > 0 && bites < maxBites) {
+                const bite = document.createElement('div');
+                bite.className = 'bite';
+                bite.style.top = `${Math.random() * 130}px`;
+                bite.style.left = `${Math.random() * 280}px`;
+                sandwich.appendChild(bite);
+                bites++;
+                message.textContent = `Yum! Bite ${bites} taken.`;
+                
+                if (bites >= maxBites * 0.8) {
+                    message.textContent += " Your sandwich is almost gone!";
+                }
+                
+                if (bites === maxBites) {
+                    message.textContent = "All gone! Make a new sandwich?";
+                    clearSandwich();
+                }
+            } else if (layers === 0) {
+                message.textContent = "Make a sandwich first!";
+            } else {
+                message.textContent = "No more sandwich left!";
+            }
+        }
+
+        function clearSandwich() {
+            sandwich.innerHTML = '';
+            layers = 0;
+            bites = 0;
+        }
+    </script>
+</body>
+</html>

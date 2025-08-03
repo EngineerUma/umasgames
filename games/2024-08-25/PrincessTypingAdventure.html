@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Princess Typing Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffe6f2;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #ff69b4;
+            font-size: 28px;
+        }
+        #princess {
+            font-size: 72px;
+            margin: 20px 0;
+        }
+        #letter-display {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #4a4a4a;
+        }
+        #message {
+            font-size: 24px;
+            margin: 20px 0;
+            min-height: 30px;
+            color: #ff69b4;
+        }
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
+            margin: 0 auto;
+        }
+        .key {
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            background-color: #ffe6f2;
+            border: 1px solid #ff69b4;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #score {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #ff69b4;
+        }
+        #input {
+            font-size: 24px;
+            padding: 10px;
+            width: 80%;
+            margin: 20px auto;
+            display: block;
+            border: 2px solid #ff69b4;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Princess Typing Adventure</h1>
+        <div id="princess">👸</div>
+        <div id="letter-display"></div>
+        <div id="message">Help the princess type the magic letter!</div>
+        <input type="text" id="input" maxlength="1" autofocus>
+        <div id="keyboard"></div>
+        <div id="score">Magic Spells Cast: <span id="score-value">0</span></div>
+    </div>
+
+    <script>
+        const letterDisplay = document.getElementById('letter-display');
+        const message = document.getElementById('message');
+        const keyboard = document.getElementById('keyboard');
+        const scoreValue = document.getElementById('score-value');
+        const input = document.getElementById('input');
+
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let currentLetter = '';
+        let score = 0;
+
+        const keyboardLayout = [
+            '`1234567890-=',
+            'QWERTYUIOP[]\\',
+            "ASDFGHJKL;'",
+            'ZXCVBNM,./'
+        ];
+
+        function getRandomLetter() {
+            return letters[Math.floor(Math.random() * letters.length)];
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreValue.textContent = score;
+        }
+
+        function newRound() {
+            currentLetter = getRandomLetter();
+            letterDisplay.textContent = currentLetter;
+            message.textContent = `Help the princess type the magic letter ${currentLetter}!`;
+            input.value = '';
+            input.focus();
+        }
+
+        function createKeyboard() {
+            keyboardLayout.forEach((row, rowIndex) => {
+                for (let i = 0; i < row.length; i++) {
+                    const key = document.createElement('div');
+                    key.className = 'key';
+                    key.textContent = row[i];
+                    keyboard.appendChild(key);
+                }
+                if (rowIndex < keyboardLayout.length - 1) {
+                    keyboard.appendChild(document.createElement('br'));
+                }
+            });
+        }
+
+        function checkLetter(typedLetter) {
+            if (typedLetter.toUpperCase() === currentLetter) {
+                message.textContent = 'Wonderful! You cast a magic spell!';
+                updateScore(1);
+                setTimeout(newRound, 1500);
+            } else {
+                message.textContent = 'Oops! That\'s not the right letter. Try again!';
+            }
+        }
+
+        input.addEventListener('input', (e) => {
+            if (e.target.value) {
+                checkLetter(e.target.value);
+            }
+        });
+
+        createKeyboard();
+        newRound();
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Explorer Rocket Launch</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #000033;
+            color: #FFD700;
+            margin: 0;
+            padding: 20px;
+        }
+        #gameCanvas {
+            border: 2px solid #FFD700;
+            background-color: #000066;
+        }
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        select, button {
+            font-size: 16px;
+            padding: 5px 10px;
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 15px;
+        }
+        #info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #message {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #FF69B4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Space Explorer Rocket Launch</h1>
+    <canvas id="gameCanvas" width="300" height="400"></canvas>
+    <div id="controls">
+        <select id="celestialBodySelect">
+            <option value="mercury">Mercury</option>
+            <option value="venus">Venus</option>
+            <option value="earth" selected>Earth</option>
+            <option value="moon">Moon</option>
+            <option value="mars">Mars</option>
+            <option value="jupiter">Jupiter</option>
+            <option value="saturn">Saturn</option>
+            <option value="uranus">Uranus</option>
+            <option value="neptune">Neptune</option>
+            <option value="pluto">Pluto</option>
+        </select>
+        <button id="launchButton">Launch Rocket</button>
+    </div>
+    <div id="info">
+        <p>Gravity: <span id="gravityInfo"></span> m/s²</p>
+        <p>Time: <span id="timeInfo"></span> seconds</p>
+    </div>
+    <div id="message"></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const celestialBodySelect = document.getElementById('celestialBodySelect');
+        const launchButton = document.getElementById('launchButton');
+        const gravityInfo = document.getElementById('gravityInfo');
+        const timeInfo = document.getElementById('timeInfo');
+        const messageEl = document.getElementById('message');
+
+        const celestialBodies = {
+            mercury: { name: 'Mercury', gravity: 3.7, color: '#8C7853', burning: false, hasRings: false, hasStorm: false },
+            venus: { name: 'Venus', gravity: 8.87, color: '#FFA500', burning: true, hasRings: false, hasStorm: false },
+            earth: { name: 'Earth', gravity: 9.81, color: '#0000FF', burning: false, hasRings: false, hasStorm: false },
+            moon: { name: 'Moon', gravity: 1.62, color: '#C0C0C0', burning: false, hasRings: false, hasStorm: false },
+            mars: { name: 'Mars', gravity: 3.71, color: '#FF0000', burning: false, hasRings: false, hasStorm: false },
+            jupiter: { name: 'Jupiter', gravity: 24.79, color: '#FFA500', burning: false, hasRings: false, hasStorm: true },
+            saturn: { name: 'Saturn', gravity: 10.44, color: '#F4C542', burning: true, hasRings: true, hasStorm: false },
+            uranus: { name: 'Uranus', gravity: 8.69, color: '#40E0D0', burning: false, hasRings: false, hasStorm: false },
+            neptune: { name: 'Neptune', gravity: 11.15, color: '#4169E1', burning: false, hasRings: false, hasStorm: false },
+            pluto: { name: 'Pluto', gravity: 0.62, color: '#DEB887', burning: false, hasRings: false, hasStorm: false }
+        };
+
+        const messages = [
+            "You're a star explorer!",
+            "Gravity can't hold you down!",
+            "Fantastic landing!",
+            "You're out of this world!",
+            "One small step for you, one giant leap for science!"
+        ];
+
+        let rocket = { x: 150, y: 350, width: 40, height: 60, vy: 0 };
+        let explorer = { x: 150, y: 370, size: 30, vy: 0, vx: 0 };
+        let currentBody = celestialBodies.earth;
+        let startTime;
+        let stars = [];
+        let gameState = 'ready'; // 'ready', 'launch', 'falling', 'landed', 'jumping', 'burning', 'onRings'
+        let jumpCount = 0;
+        let burningParticles = [];
+        let rings = [];
+        let storm = { x: 150, y: 300, radius: 20, angle: 0 };
+
+        function createStars() {
+            for (let i = 0; i < 50; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 2
+                });
+            }
+        }
+
+        function createRings() {
+            const ringCount = 3;
+            const ringSpacing = 20;
+            const startY = canvas.height - 120;
+
+            for (let i = 0; i < ringCount; i++) {
+                rings.push({
+                    y: startY - i * ringSpacing,
+                    color: `rgba(255, 255, 255, ${0.5 - i * 0.1})`
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.fillStyle = 'white';
+            for (let star of stars) {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawRocket() {
+            ctx.fillStyle = '#FF4500';
+            ctx.fillRect(rocket.x - rocket.width / 2, rocket.y - rocket.height, rocket.width, rocket.height);
+            
+            ctx.beginPath();
+            ctx.moveTo(rocket.x - rocket.width / 2, rocket.y - rocket.height);
+            ctx.lineTo(rocket.x, rocket.y - rocket.height - 20);
+            ctx.lineTo(rocket.x + rocket.width / 2, rocket.y - rocket.height);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#A0522D';
+            ctx.beginPath();
+            ctx.moveTo(rocket.x - rocket.width / 2, rocket.y);
+            ctx.lineTo(rocket.x - rocket.width, rocket.y + 20);
+            ctx.lineTo(rocket.x - rocket.width / 2, rocket.y - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(rocket.x + rocket.width / 2, rocket.y);
+            ctx.lineTo(rocket.x + rocket.width, rocket.y + 20);
+            ctx.lineTo(rocket.x + rocket.width / 2, rocket.y - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#87CEEB';
+            ctx.beginPath();
+            ctx.arc(rocket.x, rocket.y - rocket.height / 2, 10, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawExplorer() {
+            ctx.fillStyle = '#FF69B4';
+            ctx.beginPath();
+            ctx.arc(explorer.x, explorer.y, explorer.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(explorer.x - 5, explorer.y - 5, 3, 0, Math.PI * 2);
+            ctx.arc(explorer.x + 5, explorer.y - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(explorer.x, explorer.y + 5, 5, 0, Math.PI);
+            ctx.stroke();
+        }
+
+        function drawGround() {
+            ctx.fillStyle = currentBody.color;
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+
+            if (currentBody.hasRings) {
+                for (let ring of rings) {
+                    ctx.fillStyle = ring.color;
+                    ctx.fillRect(0, ring.y, canvas.width, 5);
+                }
+            }
+
+            if (currentBody.hasStorm) {
+                drawStorm();
+            }
+        }
+
+        function drawStorm() {
+            ctx.fillStyle = '#FF4136';
+            ctx.beginPath();
+            ctx.arc(storm.x, storm.y, storm.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Add swirling effect
+            ctx.strokeStyle = '#FF851B';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < 3; i++) {
+                let angle = storm.angle + i * (Math.PI * 2 / 3);
+                ctx.moveTo(storm.x, storm.y);
+                ctx.lineTo(
+                    storm.x + Math.cos(angle) * storm.radius,
+                    storm.y + Math.sin(angle) * storm.radius
+                );
+            }
+            ctx.stroke();
+
+            // Update storm angle for animation
+            storm.angle += 0.05;
+        }
+
+        function drawCelestialBodyName() {
+            ctx.font = '20px Comic Sans MS';
+            ctx.fillStyle = '#FFD700';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentBody.name, canvas.width / 2, 30);
+        }
+
+        function createBurningParticle() {
+            return {
+                x: explorer.x + (Math.random() - 0.5) * explorer.size,
+                y: explorer.y + (Math.random() - 0.5) * explorer.size,
+                vx: (Math.random() - 0.5) * 2,
+                vy: -Math.random() * 5,
+                radius: Math.random() * 3 + 1,
+                color: `hsl(${Math.random() * 60 + 15}, 100%, 50%)`
+            };
+        }
+
+        function drawBurningEffect() {
+            for (let i = 0; i < 5; i++) {
+                burningParticles.push(createBurningParticle());
+            }
+
+            for (let i = burningParticles.length - 1; i >= 0; i--) {
+                const particle = burningParticles[i];
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += 0.1;
+                particle.radius -= 0.05;
+
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (particle.radius <= 0) {
+                    burningParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function updateRocketAndExplorer() {
+            if (gameState === 'launch') {
+                rocket.y -= 2;
+                explorer.y -= 2;
+                if (rocket.y < -rocket.height) {
+                    gameState = currentBody.name === 'Moon' ? 'jumping' : 'falling';
+                    explorer.y = 50;
+                    explorer.vy = 0;
+                }
+            } else if (gameState === 'falling' || gameState === 'jumping' || gameState === 'onRings') {
+                explorer.vy += currentBody.gravity * 0.02;
+                explorer.y += explorer.vy;
+                explorer.x += explorer.vx;
+
+                if (currentBody.hasRings) {
+                    for (let ring of rings) {
+                        if (Math.abs(explorer.y + explorer.size / 2 - ring.y) < 5) {
+                            explorer.y = ring.y - explorer.size / 2;
+                            explorer.vy = 0;
+                            gameState = 'onRings';
+                            break;
+                        }
+                    }
+                }
+
+                if (explorer.y + explorer.size / 2 > canvas.height - 50) {
+                    explorer.y = canvas.height - 50 - explorer.size / 2;
+                    explorer.vy = 0;
+                    if (gameState === 'jumping') {
+                        jumpCount++;
+                        if (jumpCount < 5) {
+                            explorer.vy = -Math.sqrt(2 * currentBody.gravity * 100);
+                        } else {
+                            gameState = 'landed';
+                            endGame();
+                        }
+                    } else if (currentBody.burning) {
+                        gameState = 'burning';
+                        messageEl.textContent = `Oh no! ${currentBody.name}'s surface is too hot!`;
+                    } else {
+                        gameState = 'landed';
+                        endGame();
+                    }
+                }
+
+                if (explorer.x < 0 || explorer.x > canvas.width) {
+                    explorer.vx = -explorer.vx;
+                }
+
+                // Check for collision with the storm on Jupiter
+                if (currentBody.hasStorm) {
+                    const dx = explorer.x - storm.x;
+                    const dy = explorer.y - storm.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < storm.radius + explorer.size / 2) {
+                        explorer.vx += dx * 0.05;
+                        explorer.vy += dy * 0.05;
+                        messageEl.textContent = "Whoa! The storm is pulling you in!";
+                    }
+                }
+            }
+        }
+
+        function endGame() {
+            const endTime = new Date();
+            const totalTime = (endTime - startTime) / 1000;
+            timeInfo.textContent = totalTime.toFixed(2);
+            messageEl.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawStars();
+            drawCelestialBodyName();
+            drawGround();
+            
+            if (gameState === 'ready' || gameState === 'launch') {
+                drawRocket();
+            }
+            
+            if (gameState !== 'ready') {
+                drawExplorer();
+            }
+
+            if (gameState === 'burning') {
+                drawBurningEffect();
+            }
+            
+            updateRocketAndExplorer();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function launchRocket() {
+            if (gameState === 'ready') {
+                gameState = 'launch';
+                startTime = new Date();
+                timeInfo.textContent = "...";
+                messageEl.textContent = "Blast off!";
+            }
+        }
+
+        function resetGame() {
+            rocket = { x: 150, y: 350, width: 40, height: 60, vy: 0 };
+            explorer = { x: 150, y: 370, size: 30, vy: 0, vx: 0 };
+            gameState = 'ready';
+            jumpCount = 0;
+            burningParticles = [];
+            messageEl.textContent = "";
+            storm = { x: 150, y: 300, radius: 20, angle: 0 };
+        }
+
+        launchButton.addEventListener('click', launchRocket);
+
+        celestialBodySelect.addEventListener('change', (e) => {
+            currentBody = celestialBodies[e.target.value];
+            gravityInfo.textContent = currentBody.gravity.toFixed(2);
+            resetGame();
+            if (currentBody.hasRings) {
+                createRings();
+            } else {
+                rings = [];
+            }
+        });
+
+        canvas.addEventListener('click', () => {
+            if (gameState === 'jumping' && explorer.y === canvas.height - 50 - explorer.size / 2) {
+                explorer.vy = -Math.sqrt(2 * currentBody.gravity * 100);
+            } else if (gameState === 'onRings') {
+                explorer.vy = -5;
+                explorer.vx = (Math.random() - 0.5) * 4;
+                gameState = 'falling';
+            }
+        });
+
+        // Initialize
+        createStars();
+        currentBody = celestialBodies[celestialBodySelect.value];
+        gravityInfo.textContent = currentBody.gravity.toFixed(2);
+        resetGame();
+        gameLoop();
+    </script>
+</body>
+</html>

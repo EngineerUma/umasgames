@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Rainbow Seven's Bedtime Adventure</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a2e;
+            color: white;
+        }
+        #game-container {
+            text-align: center;
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            max-width: 90%;
+            width: 400px;
+        }
+        #seven-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        #seven-number {
+            position: absolute;
+            top: -40px;
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .block {
+            width: 60px;
+            height: 60px;
+            margin: 2px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #333;
+        }
+        .face {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .eyes {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .eye {
+            width: 18px;
+            height: 12px;
+            background-color: white;
+            border: 2px solid yellow;
+            border-radius: 40%;
+            position: relative;
+            overflow: hidden;
+        }
+        .pupil {
+            width: 6px;
+            height: 6px;
+            background-color: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 6px;
+        }
+        .mouth {
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid yellow;
+            border-radius: 0 0 10px 10px;
+        }
+        .hair {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+        }
+        .hair-strand {
+            width: 4px;
+            height: 15px;
+            margin: 0 2px;
+            border-radius: 2px;
+        }
+        #colors {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .color-block {
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #message {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #0f3460;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #16213e;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Lucky Rainbow Seven's Bedtime Adventure</h1>
+        <div id="seven-container">
+            <div id="seven-number">7</div>
+            <div class="block">
+                <div class="face">
+                    <div class="hair">
+                        <div class="hair-strand" style="background-color: red;"></div>
+                        <div class="hair-strand" style="background-color: orange;"></div>
+                        <div class="hair-strand" style="background-color: yellow;"></div>
+                        <div class="hair-strand" style="background-color: green;"></div>
+                        <div class="hair-strand" style="background-color: blue;"></div>
+                        <div class="hair-strand" style="background-color: indigo;"></div>
+                        <div class="hair-strand" style="background-color: violet;"></div>
+                    </div>
+                    <div class="eyes">
+                        <div class="eye"><div class="pupil"></div></div>
+                        <div class="eye"><div class="pupil"></div></div>
+                    </div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+            <div class="block"></div>
+        </div>
+        <div id="colors"></div>
+        <div id="message">Help Seven collect all the rainbow colors!</div>
+        <button id="startButton" onclick="startGame()">Start Game</button>
+    </div>
+
+    <script>
+        const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+        let collectedColors = [];
+        let gameStarted = false;
+
+        function startGame() {
+            if (!gameStarted) {
+                gameStarted = true;
+                document.getElementById('startButton').style.display = 'none';
+                createColorBlocks();
+                updateSeven();
+            }
+        }
+
+        function createColorBlocks() {
+            const colorsDiv = document.getElementById('colors');
+            colors.forEach(color => {
+                const colorBlock = document.createElement('div');
+                colorBlock.className = 'color-block';
+                colorBlock.style.backgroundColor = color;
+                colorBlock.onclick = () => collectColor(color);
+                colorsDiv.appendChild(colorBlock);
+            });
+        }
+
+        function collectColor(color) {
+            if (!collectedColors.includes(color)) {
+                collectedColors.push(color);
+                updateSeven();
+                document.querySelector(`.color-block[style*="${color}"]`).style.opacity = '0.3';
+                checkWin();
+            }
+        }
+
+        function updateSeven() {
+            const blocks = document.querySelectorAll('.block');
+            collectedColors.forEach((color, index) => {
+                blocks[index].style.backgroundColor = color;
+            });
+        }
+
+        function checkWin() {
+            if (collectedColors.length === colors.length) {
+                document.getElementById('message').innerText = 'Congratulations! Seven collected all the colors. Sweet dreams!';
+                document.getElementById('colors').style.display = 'none';
+                document.querySelectorAll('.block')[0].style.backgroundColor = 'purple';
+            } else {
+                document.getElementById('message').innerText = `Great job! Seven has collected ${collectedColors.length} colors. Keep going!`;
+            }
+        }
+    </script>
+</body>
+</html>

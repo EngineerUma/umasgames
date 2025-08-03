@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Adventures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #e6f3ff;
+            color: #333;
+        }
+        h1 {
+            color: #0066cc;
+            text-align: center;
+        }
+        #story {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+        #choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #error-log {
+            background-color: #ffcccc;
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Beach Adventures</h1>
+    <div id="story"></div>
+    <div id="choices"></div>
+    <div id="error-log"></div>
+
+    <script>
+        const story = document.getElementById('story');
+        const choices = document.getElementById('choices');
+        const errorLog = document.getElementById('error-log');
+
+        function logError(message) {
+            console.error(message);
+            errorLog.style.display = 'block';
+            errorLog.textContent += message + '\n';
+        }
+
+        const scenes = {
+            start: {
+                text: "Welcome to Beach Adventures! You've just arrived at the beautiful Sandgate beach. The sun is shining, and the waves are gently lapping at the shore. What would you like to do first?",
+                choices: [
+                    { text: "Build a sandcastle", next: "sandcastle" },
+                    { text: "Go for a swim", next: "swim" },
+                    { text: "Look for seashells", next: "seashells" }
+                ]
+            },
+            sandcastle: {
+                text: "You start building an amazing sandcastle. It's getting bigger and bigger! Suddenly, you spot something shiny in the sand. What do you do?",
+                choices: [
+                    { text: "Dig it out", next: "treasure" },
+                    { text: "Keep building your castle", next: "castle_contest" }
+                ]
+            },
+            swim: {
+                text: "The water feels great! As you're swimming, you see a pod of dolphins in the distance. Do you:",
+                choices: [
+                    { text: "Swim towards them", next: "dolphins" },
+                    { text: "Wave to them from where you are", next: "wave_dolphins" }
+                ]
+            },
+            seashells: {
+                text: "You find many beautiful seashells. One shell looks particularly strange. When you pick it up, it starts to glow! What's your next move?",
+                choices: [
+                    { text: "Rub the shell", next: "magic_shell" },
+                    { text: "Show it to your parents", next: "shell_museum" }
+                ]
+            },
+            treasure: {
+                text: "You've found a real pirate treasure! It's a small chest full of chocolate coins and a mysterious map. What an exciting discovery!",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            },
+            castle_contest: {
+                text: "Your sandcastle is so impressive that other kids want to join in. You end up in a friendly sandcastle building contest! And guess what? Your team wins first prize - free ice cream for everyone!",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            },
+            dolphins: {
+                text: "The dolphins are playful and swim around you. One of them even lets you hold onto its fin for a short ride! After this magical experience, you return to the beach, feeling exhilarated.",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            },
+            wave_dolphins: {
+                text: "The dolphins wave back with their flippers! It's a magical moment you'll never forget.",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            },
+            magic_shell: {
+                text: "As you rub the shell, a tiny sea fairy appears! She grants you the ability to breathe underwater for one hour. What an amazing gift!",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            },
+            shell_museum: {
+                text: "Your parents are amazed by the shell. They take you to the local museum where a scientist tells you it's a newly discovered species! They name the shell after you and put it on display.",
+                choices: [
+                    { text: "Start a new adventure", next: "start" }
+                ]
+            }
+        };
+
+        function showScene(sceneId) {
+            const scene = scenes[sceneId];
+            if (!scene) {
+                logError(`Scene '${sceneId}' not found!`);
+                story.textContent = "Oops! Something went wrong. Let's start over.";
+                showScene('start');
+                return;
+            }
+            story.textContent = scene.text;
+            choices.innerHTML = '';
+            scene.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice.text;
+                button.onclick = () => {
+                    if (scenes[choice.next]) {
+                        showScene(choice.next);
+                    } else {
+                        logError(`Scene '${choice.next}' not found!`);
+                        story.textContent = "Oops! Something went wrong. Let's start over.";
+                        showScene('start');
+                    }
+                };
+                choices.appendChild(button);
+            });
+        }
+
+        try {
+            showScene('start');
+        } catch (error) {
+            logError(`An error occurred: ${error.message}`);
+        }
+    </script>
+</body>
+</html>

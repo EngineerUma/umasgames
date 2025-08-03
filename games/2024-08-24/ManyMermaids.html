@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Kingdom Adventure</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(#00487C, #4DB6AC);
+            font-family: Arial, sans-serif;
+        }
+        #ocean {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        .creature {
+            position: absolute;
+            transition: all 2s ease;
+        }
+        #player {
+            position: absolute;
+            font-size: 40px;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        #castle {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 100px;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .collectible {
+            position: absolute;
+            font-size: 30px;
+        }
+        .mermaid {
+            position: absolute;
+            font-size: 40px;
+            transition: all 2s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="ocean">
+        <div id="castle">🏰</div>
+        <div id="score">Score: 0</div>
+    </div>
+
+    <script>
+        const ocean = document.getElementById('ocean');
+        const seaAnimals = ['🐠', '🐡', '🐙', '🦀', '🐬', '🦈', '🐳', '🐋', '🦑', '🐢', '🦞'];
+        const collectibles = ['💎', '🐚', '🦪'];
+        const hairColors = ['👱‍♀️', '👩‍🦰', '👩‍🦱', '👩‍🦳', '👩‍🦲'];
+        const accessories = ['👑', '🎀', '🌺', '🧜‍♀️', '🧜‍♂️', '🧜'];
+        let creatureElements = [];
+        let collectibleElements = [];
+        let score = 0;
+        let player;
+
+        function createCreature(type) {
+            const creature = document.createElement('div');
+            creature.className = 'creature';
+            creature.textContent = type;
+            creature.style.left = Math.random() * (ocean.clientWidth - 50) + 'px';
+            creature.style.top = Math.random() * (ocean.clientHeight - 50) + 'px';
+            creature.style.fontSize = `${Math.random() * (40 - 20) + 20}px`;
+            ocean.appendChild(creature);
+            return creature;
+        }
+
+        function createUniqueMermaid() {
+            const mermaid = document.createElement('div');
+            mermaid.className = 'mermaid';
+            const hairColor = hairColors[Math.floor(Math.random() * hairColors.length)];
+            const accessory = accessories[Math.floor(Math.random() * accessories.length)];
+            mermaid.textContent = `${hairColor}${accessory}`;
+            mermaid.style.left = Math.random() * (ocean.clientWidth - 50) + 'px';
+            mermaid.style.top = Math.random() * (ocean.clientHeight - 50) + 'px';
+            ocean.appendChild(mermaid);
+            return mermaid;
+        }
+
+        function createCollectible() {
+            const collectible = document.createElement('div');
+            collectible.className = 'collectible';
+            collectible.textContent = collectibles[Math.floor(Math.random() * collectibles.length)];
+            collectible.style.left = Math.random() * (ocean.clientWidth - 50) + 'px';
+            collectible.style.top = Math.random() * (ocean.clientHeight - 50) + 'px';
+            ocean.appendChild(collectible);
+            return collectible;
+        }
+
+        function moveCreature(creature) {
+            const x = Math.random() * (ocean.clientWidth - 50);
+            const y = Math.random() * (ocean.clientHeight - 50);
+            creature.style.left = x + 'px';
+            creature.style.top = y + 'px';
+        }
+
+        function initializeGame() {
+            // Create player
+            player = document.createElement('div');
+            player.id = 'player';
+            player.textContent = '🧜‍♀️';
+            player.style.left = '50%';
+            player.style.top = '50%';
+            ocean.appendChild(player);
+
+            // Create sea animals
+            for (let i = 0; i < 15; i++) {
+                const animalType = seaAnimals[Math.floor(Math.random() * seaAnimals.length)];
+                creatureElements.push(createCreature(animalType));
+            }
+
+            // Create unique mermaids
+            for (let i = 0; i < 10; i++) {
+                creatureElements.push(createUniqueMermaid());
+            }
+
+            // Create initial collectibles
+            for (let i = 0; i < 5; i++) {
+                collectibleElements.push(createCollectible());
+            }
+        }
+
+        function animateKingdom() {
+            creatureElements.forEach(creature => {
+                if (Math.random() < 0.02) {
+                    moveCreature(creature);
+                }
+            });
+            setTimeout(animateKingdom, 1000);
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+        }
+
+        function checkCollision() {
+            const playerRect = player.getBoundingClientRect();
+            collectibleElements.forEach((collectible, index) => {
+                const collectibleRect = collectible.getBoundingClientRect();
+                if (
+                    playerRect.left < collectibleRect.right &&
+                    playerRect.right > collectibleRect.left &&
+                    playerRect.top < collectibleRect.bottom &&
+                    playerRect.bottom > collectibleRect.top
+                ) {
+                    score += 10;
+                    updateScore();
+                    ocean.removeChild(collectible);
+                    collectibleElements.splice(index, 1);
+                    collectibleElements.push(createCollectible());
+                }
+            });
+        }
+
+        function movePlayer(e) {
+            const oceanRect = ocean.getBoundingClientRect();
+            const playerRect = player.getBoundingClientRect();
+            let x = e.clientX - oceanRect.left - playerRect.width / 2;
+            let y = e.clientY - oceanRect.top - playerRect.height / 2;
+
+            x = Math.max(0, Math.min(x, oceanRect.width - playerRect.width));
+            y = Math.max(0, Math.min(y, oceanRect.height - playerRect.height));
+
+            player.style.left = x + 'px';
+            player.style.top = y + 'px';
+
+            checkCollision();
+        }
+
+        initializeGame();
+        animateKingdom();
+
+        ocean.addEventListener('mousemove', movePlayer);
+    </script>
+</body>
+</html>

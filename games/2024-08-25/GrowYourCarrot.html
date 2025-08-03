@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grow Your Carrot Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #87CEEB;
+        }
+        #game-container {
+            width: 300px;
+            height: 400px;
+            background-color: #8B4513;
+            position: relative;
+            overflow: hidden;
+        }
+        #carrot {
+            width: 100px;
+            height: 0;
+            background-color: #FFA500;
+            position: absolute;
+            bottom: 0;
+            left: 100px;
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            transition: height 0.5s;
+        }
+        #carrot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-color: #FF8C00;
+            border-radius: 40% 40% 0 0;
+        }
+        #leaves {
+            width: 120px;
+            height: 0;
+            position: absolute;
+            bottom: 0;
+            left: 90px;
+            transition: height 0.5s, bottom 0.5s;
+        }
+        .leaf {
+            position: absolute;
+            width: 30px;
+            height: 60px;
+            background-color: #228B22;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            bottom: 0;
+        }
+        .leaf:nth-child(1) { transform: rotate(-20deg); left: 0; }
+        .leaf:nth-child(2) { transform: rotate(20deg); right: 0; }
+        .leaf:nth-child(3) { transform: rotate(0deg); left: 45px; }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #bunny {
+            width: 80px;
+            height: 80px;
+            background-color: #FFFFFF;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: absolute;
+            bottom: -100px;
+            left: 110px;
+            transition: bottom 1s;
+        }
+        #bunny::before, #bunny::after {
+            content: '';
+            position: absolute;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+        }
+        #bunny::before {
+            width: 30px;
+            height: 50px;
+            top: -30px;
+            left: 10px;
+            transform: rotate(-30deg);
+        }
+        #bunny::after {
+            width: 30px;
+            height: 50px;
+            top: -30px;
+            right: 10px;
+            transform: rotate(30deg);
+        }
+        @keyframes eatCarrot {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Grow Your Carrot!</h1>
+    <div id="game-container">
+        <div id="carrot"></div>
+        <div id="leaves">
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+            <div class="leaf"></div>
+        </div>
+        <div id="bunny"></div>
+    </div>
+    <button id="grow-button">Water the Carrot</button>
+    <div id="info">
+        <p>Water the carrot to help it grow!</p>
+        <p>Growth stage: <span id="growth-stage">Seed</span></p>
+    </div>
+
+    <script>
+        const carrot = document.getElementById('carrot');
+        const leaves = document.getElementById('leaves');
+        const growButton = document.getElementById('grow-button');
+        const growthStage = document.getElementById('growth-stage');
+        const bunny = document.getElementById('bunny');
+
+        let growth = 0;
+        const maxGrowth = 5;
+
+        growButton.addEventListener('click', () => {
+            if (growth < maxGrowth) {
+                growth++;
+                let carrotHeight = growth * 40;
+                carrot.style.height = `${carrotHeight}px`;
+                leaves.style.height = `${growth * 20}px`;
+                leaves.style.bottom = `${carrotHeight}px`;
+                updateGrowthStage();
+            }
+        });
+
+        function updateGrowthStage() {
+            const stages = ['Seed', 'Sprout', 'Small Carrot', 'Medium Carrot', 'Large Carrot', 'Fully Grown'];
+            growthStage.textContent = stages[growth];
+
+            if (growth === maxGrowth) {
+                growButton.disabled = true;
+                growButton.textContent = 'Carrot Fully Grown!';
+                setTimeout(bunnyEatsCarrot, 1000);
+            }
+        }
+
+        function bunnyEatsCarrot() {
+            bunny.style.bottom = '0px';
+            setTimeout(() => {
+                carrot.style.animation = 'eatCarrot 0.5s 3';
+                leaves.style.animation = 'eatCarrot 0.5s 3';
+                bunny.style.animation = 'eatCarrot 0.5s 3';
+                setTimeout(() => {
+                    carrot.style.display = 'none';
+                    leaves.style.display = 'none';
+                    growthStage.textContent = 'Eaten by Bunny!';
+                }, 1500);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
