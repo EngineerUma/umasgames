@@ -18,6 +18,18 @@ def games_from_date(date: Path) -> list[Path]:
     "Return sorted list of .html files in the given date directory."
     return sorted([f for f in date.iterdir() if f.is_file() and f.suffix == '.html'], reverse=True)
 
+def browse_by_date():
+    return air.Nav(
+        air.H2("Browse by Date"),
+        air.Ul(
+            *[
+                air.Li(
+                    air.A(f"{date.name} ({len(games_from_date(date))} games)", href=f"#date-{date.name}")
+                ) for date in dates
+            ]
+        ),
+    )
+
 @app.get("/games/{date}/{name}")
 async def serve_game_html(date: str, name: str) -> HTMLResponse:
     "Serve HTML files from /games/{date}/{name} with Starlette's HTMLResponse"
@@ -36,6 +48,8 @@ async def index() -> HTMLResponse:
     return air.layouts.mvpcss(
         air.H1("Uma's Games"),
         air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy. I started making games when I was 5. I'm 6 now!"),
+        browse_by_date(),
+        air.Hr(),
         *[
             air.Section(
                 air.Header(
@@ -48,7 +62,8 @@ async def index() -> HTMLResponse:
                     )
                     for game in games_from_date(date)
                 ],
-                air.Hr()
+                air.Hr(),
+                id=f"date-{date.name}"
             )
             for date in dates
         ],
