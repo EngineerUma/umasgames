@@ -51,7 +51,6 @@ async def serve_game_asset(request: Request, date: str, name: str) -> FileRespon
     if name.endswith(".js") and "raw" not in request.query_params:
         content = file_path.read_text()
         if "import React" in content:
-            # It's a React file, so serve a dynamic HTML host.
             return jinja(request, name="react_host.html", context=dict(
                 title=space_pascal(file_path.stem),
                 component_name=name,
