@@ -16,8 +16,8 @@ def space_pascal(s: str) -> str:
 
 
 def games_from_date(date: Path) -> list[Path]:
-    "Return sorted list of .html and .js files in the given date directory."
-    return sorted([f for f in date.iterdir() if f.is_file() and f.suffix in ['.html', '.js']], reverse=True)
+    "Return sorted list of .html, .js, and .tsx files in the given date directory."
+    return sorted([f for f in date.iterdir() if f.is_file() and f.suffix in ['.html', '.js', '.tsx']], reverse=True)
 
 def browse_by_date():
     return air.Nav(
@@ -47,10 +47,10 @@ async def serve_game_asset(request: Request, date: str, name: str) -> FileRespon
             air.P(f"No game found for {date}/{name}.")
         )
 
-    # If it's a JS file and doesn't have '?raw=true', check if it's a React component.
-    if name.endswith(".js") and "raw" not in request.query_params:
+    # If it's a JS or TSX file and doesn't have '?raw=true', check if it's a React component.
+    if (name.endswith(".js") or name.endswith(".tsx")) and "raw" not in request.query_params:
         content = file_path.read_text()
-        if "import React" in content:
+        if "import React" in content or name.endswith(".tsx"):
             return jinja(request, name="react_host.html", context=dict(
                 title=space_pascal(file_path.stem),
                 component_name=name,
