@@ -8,7 +8,6 @@ GAMES_DIR = "games"
 
 app: air.Air = air.Air()
 jinja = air.templates.JinjaRenderer(directory=Path(".") / "templates")
-dates: list[Path] = sorted([d for d in Path('games').iterdir() if d.is_dir()], reverse=True)
 dates: list[Path] = sorted([d for d in Path(GAMES_DIR).iterdir() if d.is_dir()], reverse=True)
 
 def space_pascal(s: str) -> str:
