@@ -193,6 +193,9 @@
                             <span class="bunny" aria-hidden="true">🐰</span>
                         </div>
                         <p id="loadingText">Initializing hop sequence...</p>
+                        <div style="margin-top: 1rem;">
+                            <button id="skipBtn" style="font-size:0.9rem;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid #ccc;background:#ffffff;color:#222222;cursor:pointer;">Skip</button>
+                        </div>
                     </div>
                     <style>
                         .loader { text-align: center; padding: 4rem 1rem; max-width: 700px; margin: 0 auto; }
@@ -271,6 +274,20 @@
                 }
 
                 requestAnimationFrame(tick);
+
+                // wire Skip button to finish immediately
+                const skipBtn = document.getElementById('skipBtn');
+                if (skipBtn) {
+                    skipBtn.addEventListener('click', function() {
+                        // guard double clicks
+                        skipBtn.disabled = true;
+                        root.style.setProperty('--progress', 100);
+                        bar.style.width = '100%';
+                        positionBunny(1);
+                        loadingText.textContent = "Ready! Redirecting...";
+                        setTimeout(() => location.href = '/games', 300);
+                    });
+                }
             });
         });
     </script>
