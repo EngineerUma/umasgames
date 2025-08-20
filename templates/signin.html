@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Uma's Games</title>
+    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+    <style>
+        .signin-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .rabbit-verification {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .rabbit-container {
+            position: relative;
+            height: 100px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        .rabbit {
+            position: absolute;
+            font-size: 2rem;
+            animation: hop 2s infinite ease-in-out;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .rabbit:hover {
+            transform: scale(1.2);
+        }
+        .rabbit.clicked {
+            animation: none;
+            transform: scale(1.5) rotate(360deg);
+            color: #4CAF50;
+        }
+        @keyframes hop {
+            0%, 100% { 
+                transform: translateY(0px); 
+            }
+            50% { 
+                transform: translateY(-20px); 
+            }
+        }
+        .verification-status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .verified {
+            background: #d4edda;
+            color: #155724;
+        }
+        .not-verified {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <main class="signin-container">
+        <h1>🎮 Sign In to Uma's Games</h1>
+        <p>Welcome! Please sign in to see all my amazing games!</p>
+        
+        <form id="signinForm">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="rabbit-verification">
+                <h3>🤖 Verify you're not a robot</h3>
+                <p>Click on all the rabbits to prove you're human!</p>
+                <div class="rabbit-container" id="rabbitContainer">
+                    <span class="rabbit" data-rabbit="1" style="left: 10%;">🐰</span>
+                    <span class="rabbit" data-rabbit="2" style="left: 30%;">🐇</span>
+                    <span class="rabbit" data-rabbit="3" style="left: 50%;">🐰</span>
+                    <span class="rabbit" data-rabbit="4" style="left: 70%;">🐇</span>
+                    <span class="rabbit" data-rabbit="5" style="left: 90%;">🐰</span>
+                </div>
+                <div id="verificationStatus" class="verification-status not-verified">
+                    Click all 5 rabbits to continue
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn" disabled>Sign In</button>
+        </form>
+    </main>
+
+    <script>
+        let clickedRabbits = new Set();
+        const totalRabbits = 5;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const rabbits = document.querySelectorAll('.rabbit');
+            const submitBtn = document.getElementById('submitBtn');
+            const verificationStatus = document.getElementById('verificationStatus');
+            const form = document.getElementById('signinForm');
+            
+            // Add click handlers to rabbits
+            rabbits.forEach(rabbit => {
+                rabbit.addEventListener('click', function() {
+                    const rabbitId = this.getAttribute('data-rabbit');
+                    
+                    if (!clickedRabbits.has(rabbitId)) {
+                        clickedRabbits.add(rabbitId);
+                        this.classList.add('clicked');
+                        
+                        // Check if all rabbits are clicked
+                        if (clickedRabbits.size === totalRabbits) {
+                            verificationStatus.textContent = '✅ Verification complete!';
+                            verificationStatus.className = 'verification-status verified';
+                            submitBtn.disabled = false;
+                        } else {
+                            verificationStatus.textContent = `${clickedRabbits.size}/${totalRabbits} rabbits clicked`;
+                        }
+                    }
+                });
+            });
+            
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (clickedRabbits.size !== totalRabbits) {
+                    alert('Please verify you\'re not a robot first!');
+                    return;
+                }
+                
+                // Show loading page
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 4rem;">
+                        <h1>🐰 Loading Uma's Games...</h1>
+                        <div style="font-size: 3rem; margin: 2rem 0;">
+                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out;">🐰</span>
+                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out 0.2s;">🐇</span>
+                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out 0.4s;">🐰</span>
+                        </div>
+                        <p>Hopping into the fun zone...</p>
+                    </div>
+                    <style>
+                        @keyframes hop {
+                            0%, 100% { transform: translateY(0px); }
+                            50% { transform: translateY(-30px); }
+                        }
+                    </style>
+                `;
+                
+                // Simulate loading time then redirect
+                setTimeout(() => {
+                    window.location.href = '/games';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

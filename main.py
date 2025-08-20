@@ -31,7 +31,6 @@ def browse_by_date():
     )
 
 from starlette.requests import Request
-
 from starlette.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
@@ -59,7 +58,11 @@ async def serve_game_asset(request: Request, date: str, name: str) -> FileRespon
     return FileResponse(file_path)
 
 @app.get("/")
-async def index() -> HTMLResponse:
+async def index(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("signin.html", {"request": request})
+
+@app.get("/games")
+async def games_index() -> HTMLResponse:
     return air.layouts.mvpcss(
         air.H1("Uma's Games"),
         air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy. I started making games when I was 5. I'm 6 now!"),
