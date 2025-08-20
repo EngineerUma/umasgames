@@ -184,114 +184,89 @@
                     return;
                 }
                 
-                // Show loading page with silky smooth wave
+                // Show loading page with a simple sine-wave progress and a bunny that goes up/down
                 document.body.innerHTML = `
-                    <svg width="0" height="0" style="position:absolute">
-                        <defs>
-                            <clipPath id="waveClip">
-                                <path id="wavePath" d="M0 30 Q 50 5 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 T 900 30 T 1000 30 V60 H0 Z"/>
-                            </clipPath>
-                        </defs>
-                    </svg>
-                    
                     <div class="loader">
                         <h1>🐰 Loading Uma's Games...</h1>
-                        <div class="track">
+                        <div class="track" id="sineTrack">
                             <div class="bar"></div>
-                            <span class="runner" aria-hidden="true">🐰</span>
+                            <span class="bunny" aria-hidden="true">🐰</span>
                         </div>
                         <p id="loadingText">Initializing hop sequence...</p>
-                        <div style="font-size: 1.5rem; margin: 2rem 0;">
-                            <span style="animation: hop 0.6s infinite ease-in-out;">🐇</span>
-                            <span style="animation: hop 0.6s infinite ease-in-out 0.2s;">🐰</span>
-                            <span style="animation: hop 0.6s infinite ease-in-out 0.4s;">🐇</span>
-                        </div>
                     </div>
-                    
                     <style>
-                        .loader { text-align: center; padding: 4rem 1rem; max-width: 600px; margin: 0 auto; }
-                        
-                        .track {
-                            height: 60px;
-                            position: relative;
-                            background: #f0f0f0;
-                            border: 2px solid #ddd;
-                            clip-path: url(#waveClip);
-                            overflow: visible;
-                            margin: 3rem 0;
-                        }
-                        
-                        .bar {
-                            height: 100%;
-                            background: linear-gradient(90deg, #4CAF50, #81C784);
-                            width: calc(var(--progress, 0) * 1%);
-                            clip-path: url(#waveClip);
-                            transition: width 0.4s linear;
-                        }
-                        
-                        .runner {
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            font-size: 2.2rem;
-                            offset-path: path('M0 30 Q 50 5 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 T 900 30 T 1000 30');
-                            offset-distance: calc(var(--progress, 0) * 1%);
-                            transform: translate(-50%, -50%) translateZ(0);
-                            pointer-events: none;
-                            animation: gentleHop 2.5s ease-in-out infinite;
-                        }
-                        
-                        @keyframes hop {
-                            0%, 100% { transform: translateY(0px); }
-                            50% { transform: translateY(-30px); }
-                        }
-                        
-                        @keyframes gentleHop {
-                            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
-                            50% { transform: translate(-50%, -65%) rotate(-8deg); }
-                        }
-                        
-                        @media (prefers-reduced-motion: reduce) {
-                            .runner { animation: none; }
-                            .bar { transition: none; }
-                        }
+                        .loader { text-align: center; padding: 4rem 1rem; max-width: 700px; margin: 0 auto; }
+                        .track { height: 80px; position: relative; background: linear-gradient(180deg,#fafafa,#f0f0f0); border-radius: 10px; border: 2px solid #e0e0e0; margin: 2.5rem 0; overflow: hidden; }
+                        .track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(0,0,0,0.06); transform: translateY(-50%); }
+                        .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #4CAF50, #81C784); border-radius: 8px 0 0 8px; transition: width 260ms linear; }
+                        .bunny { position: absolute; left: 0; top: 50%; transform: translate(-50%, -50%); font-size: 2.2rem; pointer-events: none; will-change: left, top; transition: transform 200ms linear; }
+                        @media (prefers-reduced-motion: reduce) { .bunny, .bar { transition: none; } }
                     </style>
                 `;
-                
+
                 const loadingText = document.getElementById('loadingText');
                 const root = document.documentElement;
-                
+                const track = document.getElementById('sineTrack');
+                const bar = document.querySelector('.bar');
+                const bunny = document.querySelector('.bunny');
+
                 const steps = [
                     { p: 20, t: "Gathering carrots...", ms: 1000 },
-                    { p: 40, t: "Polishing game controllers...", ms: 2000 },
-                    { p: 60, t: "Warming up the fun engines...", ms: 3000 },
-                    { p: 80, t: "Almost ready to play...", ms: 4000 },
-                    { p: 100, t: "Welcome to Uma's Games!", ms: 5000 }
+                    { p: 40, t: "Polishing game controllers...", ms: 1600 },
+                    { p: 60, t: "Warming up the fun engines...", ms: 2400 },
+                    { p: 80, t: "Almost ready to play...", ms: 3200 },
+                    { p: 100, t: "Welcome to Uma's Games!", ms: 4000 }
                 ];
-                
+
                 let i = 0, start;
-                
+
+                function positionBunny(progressPercent) {
+                    // progressPercent: 0..1
+                    if (!track) return;
+                    const rect = track.getBoundingClientRect();
+                    const x = progressPercent * rect.width;
+                    // sine wave: 2 full cycles across the track, amplitude ~22px
+                    const cycles = 2;
+                    const amplitude = Math.min(26, rect.height * 0.28);
+                    const center = rect.height / 2;
+                    const y = center + Math.sin(progressPercent * cycles * Math.PI * 2) * amplitude;
+
+                    // place bunny (account for its center using transform)
+                    bunny.style.left = `${x}px`;
+                    bunny.style.top = `${y}px`;
+
+                    // subtle tilt depending on slope (derivative of sine)
+                    const slope = Math.cos(progressPercent * cycles * Math.PI * 2) * cycles * Math.PI * 2;
+                    const angle = Math.max(-18, Math.min(18, slope * 6));
+                    bunny.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                }
+
                 function tick(ts) {
                     if (!start) start = ts;
                     const elapsed = ts - start;
                     const target = steps[i];
-                    
+
                     // Linear interpolation to target progress
                     const progress = Math.min((elapsed / target.ms) * target.p, target.p);
+                    // apply to CSS var and visuals
                     root.style.setProperty('--progress', progress);
-                    
+                    bar.style.width = progress + '%';
+
+                    const p = Math.max(0, Math.min(1, progress / 100));
+                    positionBunny(p);
+
                     if (progress >= target.p) {
                         loadingText.textContent = target.t;
                         start = ts;
                         i++;
                         if (i === steps.length) {
-                            setTimeout(() => location.href = '/games', 1500);
+                            setTimeout(() => location.href = '/games', 1200);
                             return;
                         }
                     }
                     requestAnimationFrame(tick);
                 }
-                
+
                 requestAnimationFrame(tick);
             });
         });
