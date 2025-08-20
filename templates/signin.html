@@ -87,17 +87,19 @@
             
             <div class="rabbit-verification">
                 <h3>🤖 Verify you're not a robot</h3>
-                <p>Click on all the rabbits to prove you're human!</p>
+                <p>Click ONLY the rabbits that are hopping in REVERSE order (biggest to smallest)!</p>
                 <div class="rabbit-container" id="rabbitContainer">
-                    <span class="rabbit" data-rabbit="1" style="left: 10%;">🐰</span>
-                    <span class="rabbit" data-rabbit="2" style="left: 30%;">🐇</span>
-                    <span class="rabbit" data-rabbit="3" style="left: 50%;">🐰</span>
-                    <span class="rabbit" data-rabbit="4" style="left: 70%;">🐇</span>
-                    <span class="rabbit" data-rabbit="5" style="left: 90%;">🐰</span>
+                    <span class="rabbit" data-rabbit="1" data-size="medium" style="left: 15%; font-size: 1.8rem;">🐰</span>
+                    <span class="rabbit" data-rabbit="2" data-size="large" style="left: 35%; font-size: 2.4rem;">🐇</span>
+                    <span class="rabbit" data-rabbit="3" data-size="small" style="left: 55%; font-size: 1.2rem;">🐰</span>
+                    <span class="rabbit" data-rabbit="4" data-size="medium" style="left: 75%; font-size: 1.8rem;">🐇</span>
+                    <span class="rabbit decoy" data-rabbit="decoy1" style="left: 25%; font-size: 1.5rem; animation-direction: reverse;">🐭</span>
+                    <span class="rabbit decoy" data-rabbit="decoy2" style="left: 65%; font-size: 1.3rem; animation-direction: reverse;">🐹</span>
                 </div>
                 <div id="verificationStatus" class="verification-status not-verified">
-                    Click all 5 rabbits to continue
+                    Click rabbits in reverse size order: Large → Medium → Small. Avoid the decoy animals!
                 </div>
+                <button type="button" id="resetBtn" style="margin-top: 0.5rem; font-size: 0.8rem;">Reset</button>
             </div>
             
             <button type="submit" id="submitBtn" disabled>Sign In</button>
@@ -105,55 +107,99 @@
     </main>
 
     <script>
-        let clickedRabbits = new Set();
-        const totalRabbits = 5;
+        let clickSequence = [];
+        const correctSequence = ['2', '1', '4', '3']; // Large, Medium, Medium, Small (data-rabbit values)
+        let isVerified = false;
         
         document.addEventListener('DOMContentLoaded', function() {
             const rabbits = document.querySelectorAll('.rabbit');
             const submitBtn = document.getElementById('submitBtn');
             const verificationStatus = document.getElementById('verificationStatus');
+            const resetBtn = document.getElementById('resetBtn');
             const form = document.getElementById('signinForm');
+            
+            function resetVerification() {
+                clickSequence = [];
+                isVerified = false;
+                rabbits.forEach(rabbit => {
+                    rabbit.classList.remove('clicked');
+                });
+                verificationStatus.textContent = 'Click rabbits in reverse size order: Large → Medium → Small. Avoid the decoy animals!';
+                verificationStatus.className = 'verification-status not-verified';
+                submitBtn.disabled = true;
+            }
             
             // Add click handlers to rabbits
             rabbits.forEach(rabbit => {
                 rabbit.addEventListener('click', function() {
                     const rabbitId = this.getAttribute('data-rabbit');
                     
-                    if (!clickedRabbits.has(rabbitId)) {
-                        clickedRabbits.add(rabbitId);
+                    // Check if it's a decoy animal
+                    if (rabbitId.startsWith('decoy')) {
+                        verificationStatus.textContent = '❌ Wrong! You clicked a decoy animal. Try again!';
+                        verificationStatus.className = 'verification-status not-verified';
+                        setTimeout(resetVerification, 1500);
+                        return;
+                    }
+                    
+                    // Check if already verified
+                    if (isVerified) return;
+                    
+                    // Add to sequence if not already clicked
+                    if (!clickSequence.includes(rabbitId)) {
+                        clickSequence.push(rabbitId);
                         this.classList.add('clicked');
                         
-                        // Check if all rabbits are clicked
-                        if (clickedRabbits.size === totalRabbits) {
-                            verificationStatus.textContent = '✅ Verification complete!';
+                        // Check if sequence is correct so far
+                        const currentStep = clickSequence.length - 1;
+                        if (clickSequence[currentStep] !== correctSequence[currentStep]) {
+                            verificationStatus.textContent = '❌ Wrong order! Remember: Large → Medium → Small';
+                            verificationStatus.className = 'verification-status not-verified';
+                            setTimeout(resetVerification, 1500);
+                            return;
+                        }
+                        
+                        // Check if sequence is complete
+                        if (clickSequence.length === correctSequence.length) {
+                            verificationStatus.textContent = '✅ Perfect! You\'re definitely human!';
                             verificationStatus.className = 'verification-status verified';
                             submitBtn.disabled = false;
+                            isVerified = true;
                         } else {
-                            verificationStatus.textContent = `${clickedRabbits.size}/${totalRabbits} rabbits clicked`;
+                            const remaining = correctSequence.length - clickSequence.length;
+                            verificationStatus.textContent = `✓ Correct! ${remaining} more to go...`;
                         }
                     }
                 });
             });
             
+            resetBtn.addEventListener('click', resetVerification);
+            
             // Handle form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                if (clickedRabbits.size !== totalRabbits) {
-                    alert('Please verify you\'re not a robot first!');
+                if (!isVerified) {
+                    alert('Please complete the robot verification first!');
                     return;
                 }
                 
-                // Show loading page
+                // Show loading page with progress bar
                 document.body.innerHTML = `
-                    <div style="text-align: center; padding: 4rem;">
+                    <div style="text-align: center; padding: 4rem; max-width: 600px; margin: 0 auto;">
                         <h1>🐰 Loading Uma's Games...</h1>
-                        <div style="font-size: 3rem; margin: 2rem 0;">
-                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out;">🐰</span>
-                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out 0.2s;">🐇</span>
-                            <span class="loading-rabbit" style="animation: hop 0.8s infinite ease-in-out 0.4s;">🐰</span>
+                        <div style="margin: 3rem 0;">
+                            <div style="background: #f0f0f0; height: 40px; border-radius: 20px; position: relative; overflow: hidden; border: 2px solid #ddd;">
+                                <div id="progressBar" style="background: linear-gradient(90deg, #4CAF50, #81C784); height: 100%; width: 0%; border-radius: 18px; transition: width 0.5s ease;"></div>
+                                <div id="rabbitRunner" style="position: absolute; top: 50%; transform: translateY(-50%); left: -30px; font-size: 2rem; transition: left 0.5s ease;">🐰</div>
+                            </div>
+                            <div style="margin-top: 1rem; font-size: 1.2rem;" id="loadingText">Initializing hop sequence...</div>
                         </div>
-                        <p>Hopping into the fun zone...</p>
+                        <div style="font-size: 1.5rem; margin: 2rem 0;">
+                            <span style="animation: hop 0.6s infinite ease-in-out;">🐇</span>
+                            <span style="animation: hop 0.6s infinite ease-in-out 0.2s;">🐰</span>
+                            <span style="animation: hop 0.6s infinite ease-in-out 0.4s;">🐇</span>
+                        </div>
                     </div>
                     <style>
                         @keyframes hop {
@@ -163,10 +209,31 @@
                     </style>
                 `;
                 
-                // Simulate loading time then redirect
-                setTimeout(() => {
-                    window.location.href = '/games';
-                }, 2000);
+                const progressBar = document.getElementById('progressBar');
+                const rabbitRunner = document.getElementById('rabbitRunner');
+                const loadingText = document.getElementById('loadingText');
+                
+                const loadingSteps = [
+                    { progress: 20, text: "Gathering carrots...", delay: 500 },
+                    { progress: 40, text: "Polishing game controllers...", delay: 1000 },
+                    { progress: 60, text: "Warming up the fun engines...", delay: 1500 },
+                    { progress: 80, text: "Almost ready to play...", delay: 2000 },
+                    { progress: 100, text: "Welcome to Uma's Games!", delay: 2500 }
+                ];
+                
+                loadingSteps.forEach((step, index) => {
+                    setTimeout(() => {
+                        progressBar.style.width = step.progress + '%';
+                        rabbitRunner.style.left = (step.progress * 5.5) + 'px'; // Move rabbit along
+                        loadingText.textContent = step.text;
+                        
+                        if (step.progress === 100) {
+                            setTimeout(() => {
+                                window.location.href = '/games';
+                            }, 1000);
+                        }
+                    }, step.delay);
+                });
             });
         });
     </script>
