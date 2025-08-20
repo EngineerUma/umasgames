@@ -12,6 +12,14 @@ const NeckGamesStories = () => {
   const [completedPoses, setCompletedPoses] = useState([]);
   const [gamePhase, setGamePhase] = useState('ready'); // ready, playing, completed
 
+  // Interactive Space Explorer states
+  const [isPlayingSpaceGame, setIsPlayingSpaceGame] = useState(false);
+  const [currentScan, setCurrentScan] = useState(0);
+  const [scanTimer, setScanTimer] = useState(8);
+  const [discoveredAliens, setDiscoveredAliens] = useState([]);
+  const [spaceGamePhase, setSpaceGamePhase] = useState('ready'); // ready, scanning, completed
+  const [scanDirection, setScanDirection] = useState('');
+
   const games = [
     {
       id: "simon-says",
@@ -116,7 +124,8 @@ const NeckGamesStories = () => {
         "🪐 Search for planets below (slight downward glance)",
         "👽 360° space scan (slow, complete head circle)"
       ],
-      emoji: "🚀"
+      emoji: "🚀",
+      isInteractive: true
     },
     {
       id: "dancing-dj",
@@ -184,6 +193,49 @@ const NeckGamesStories = () => {
     }
   ];
 
+  const spaceScanAreas = [
+    {
+      direction: "Left Scan",
+      emoji: "🚀",
+      instruction: "Slowly turn your head LEFT to scan for alien spaceships!",
+      discovery: "You found a sleek silver spaceship hiding behind an asteroid!",
+      alien: "👽",
+      duration: 8
+    },
+    {
+      direction: "Right Scan", 
+      emoji: "🛸",
+      instruction: "Gently turn your head RIGHT to look for flying saucers!",
+      discovery: "Amazing! You spotted a spinning UFO with colorful lights!",
+      alien: "🛸",
+      duration: 8
+    },
+    {
+      direction: "Up Scan",
+      emoji: "🌟",
+      instruction: "Look UP carefully to gaze at distant stars and galaxies!",
+      discovery: "Wow! You discovered a twinkling constellation with a friendly star being!",
+      alien: "⭐",
+      duration: 10
+    },
+    {
+      direction: "Down Scan",
+      emoji: "🪐",
+      instruction: "Look DOWN slightly to search for planets below!",
+      discovery: "Incredible! You found a purple planet with three moons and space creatures!",
+      alien: "🪐",
+      duration: 8
+    },
+    {
+      direction: "360° Scan",
+      emoji: "👽",
+      instruction: "Do a slow, complete head circle to scan all around space!",
+      discovery: "JACKPOT! You completed the full scan and found the alien mothership!",
+      alien: "🛸👽🚀",
+      duration: 12
+    }
+  ];
+
   // Timer effect for animal pose game
   useEffect(() => {
     let interval;
@@ -207,6 +259,31 @@ const NeckGamesStories = () => {
     }
     return () => clearInterval(interval);
   }, [isPlayingAnimalGame, poseTimer, gamePhase, currentPose, completedPoses]);
+
+  // Timer effect for space explorer game
+  useEffect(() => {
+    let interval;
+    if (isPlayingSpaceGame && scanTimer > 0 && spaceGamePhase === 'scanning') {
+      interval = setInterval(() => {
+        setScanTimer(scanTimer - 1);
+      }, 1000);
+    } else if (scanTimer === 0 && isPlayingSpaceGame && spaceGamePhase === 'scanning') {
+      // Discovery made!
+      const newDiscoveredAliens = [...discoveredAliens, currentScan];
+      setDiscoveredAliens(newDiscoveredAliens);
+      
+      if (currentScan < spaceScanAreas.length - 1) {
+        setCurrentScan(currentScan + 1);
+        setScanTimer(spaceScanAreas[currentScan + 1].duration);
+        setScanDirection(spaceScanAreas[currentScan + 1].direction);
+      } else {
+        // Game completed
+        setSpaceGamePhase('completed');
+        setIsPlayingSpaceGame(false);
+      }
+    }
+    return () => clearInterval(interval);
+  }, [isPlayingSpaceGame, scanTimer, spaceGamePhase, currentScan, discoveredAliens]);
 
   const startAnimalGame = () => {
     setIsPlayingAnimalGame(true);
@@ -238,6 +315,42 @@ const NeckGamesStories = () => {
     } else {
       setGamePhase('completed');
       setIsPlayingAnimalGame(false);
+    }
+  };
+
+  const startSpaceGame = () => {
+    setIsPlayingSpaceGame(true);
+    setSpaceGamePhase('scanning');
+    setCurrentScan(0);
+    setScanTimer(spaceScanAreas[0].duration);
+    setScanDirection(spaceScanAreas[0].direction);
+    setDiscoveredAliens([]);
+  };
+
+  const pauseSpaceGame = () => {
+    setIsPlayingSpaceGame(!isPlayingSpaceGame);
+  };
+
+  const resetSpaceGame = () => {
+    setIsPlayingSpaceGame(false);
+    setSpaceGamePhase('ready');
+    setCurrentScan(0);
+    setScanTimer(spaceScanAreas[0].duration);
+    setScanDirection('');
+    setDiscoveredAliens([]);
+  };
+
+  const skipScan = () => {
+    const newDiscoveredAliens = [...discoveredAliens, currentScan];
+    setDiscoveredAliens(newDiscoveredAliens);
+    
+    if (currentScan < spaceScanAreas.length - 1) {
+      setCurrentScan(currentScan + 1);
+      setScanTimer(spaceScanAreas[currentScan + 1].duration);
+      setScanDirection(spaceScanAreas[currentScan + 1].direction);
+    } else {
+      setSpaceGamePhase('completed');
+      setIsPlayingSpaceGame(false);
     }
   };
 
@@ -490,6 +603,172 @@ const NeckGamesStories = () => {
                     className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all"
                   >
                     Play Again! 🔄
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('simon-says')}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
+                  >
+                    Try Other Games
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Interactive Space Explorer Tab */}
+        {activeTab === 'space-explorer' && (
+          <div>
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-4">🚀</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Interactive Space Explorer
+              </h2>
+              <p className="text-gray-600">
+                Scan the galaxy for aliens and planets using your neck movements!
+              </p>
+              <button
+                onClick={() => setActiveTab('simon-says')}
+                className="mt-3 text-purple-500 hover:text-purple-700 text-sm underline"
+              >
+                ← Back to Other Games
+              </button>
+            </div>
+
+            {spaceGamePhase === 'ready' && (
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl p-8 text-center shadow-lg">
+                <div className="text-6xl mb-4">🚀🛸👽🌟🪐</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Ready for Space Exploration?</h3>
+                <p className="text-gray-600 mb-6">
+                  You'll scan 5 different areas of space using your neck movements. Each scan has a timer and you'll discover amazing aliens and planets!
+                </p>
+                <button
+                  onClick={startSpaceGame}
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-full text-xl font-bold hover:shadow-lg transition-all"
+                >
+                  <Play className="w-6 h-6 inline mr-2" />
+                  Start Space Mission!
+                </button>
+              </div>
+            )}
+
+            {spaceGamePhase === 'scanning' && (
+              <div className="space-y-6">
+                {/* Current Scan Display */}
+                <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl p-8 text-center shadow-lg">
+                  <div className="text-8xl mb-4">{spaceScanAreas[currentScan].emoji}</div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    {spaceScanAreas[currentScan].direction}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Scanning sector {currentScan + 1} of {spaceScanAreas.length}
+                  </p>
+                  
+                  {/* Scanner Timer */}
+                  <div className="relative w-32 h-32 mx-auto mb-6">
+                    <div className={`w-32 h-32 rounded-full flex items-center justify-center text-white transition-all duration-500 ${
+                      scanTimer > 3 ? 'bg-gradient-to-r from-blue-400 to-purple-400' :
+                      scanTimer > 1 ? 'bg-gradient-to-r from-orange-400 to-red-400 animate-pulse' :
+                      'bg-gradient-to-r from-green-400 to-blue-400'
+                    }`}>
+                      <span className="text-3xl font-bold">{scanTimer}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scanning Instruction */}
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <div className="text-center">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">Mission Control says:</h4>
+                    <p className="text-gray-700 text-lg">
+                      {spaceScanAreas[currentScan].instruction}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Space Controls */}
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={pauseSpaceGame}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
+                  >
+                    {isPlayingSpaceGame ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={skipScan}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
+                  >
+                    Skip Scan →
+                  </button>
+                  <button
+                    onClick={resetSpaceGame}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Discovery Progress */}
+                <div className="bg-white rounded-xl p-4 shadow-lg">
+                  <div className="text-center mb-3">
+                    <span className="text-gray-600 font-medium">
+                      Scan {currentScan + 1} of {spaceScanAreas.length}
+                    </span>
+                  </div>
+                  <div className="flex justify-center space-x-2 mb-3">
+                    {spaceScanAreas.map((area, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm ${
+                          discoveredAliens.includes(idx) ? 'bg-green-500 text-white' :
+                          idx === currentScan ? 'bg-blue-500 text-white animate-pulse' :
+                          'bg-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {discoveredAliens.includes(idx) ? <CheckCircle className="w-5 h-5" /> : area.emoji}
+                      </div>
+                    ))}
+                  </div>
+                  {discoveredAliens.length > 0 && (
+                    <div className="text-center">
+                      <span className="text-green-600 font-medium">
+                        🎉 {discoveredAliens.length} alien discovery{discoveredAliens.length > 1 ? 'ies' : 'y'} made!
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {spaceGamePhase === 'completed' && (
+              <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-8 text-center shadow-lg">
+                <div className="text-6xl mb-4">🎉</div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Mission Accomplished, Space Commander!</h3>
+                <p className="text-gray-600 mb-6">
+                  You've successfully scanned the entire galaxy and made amazing discoveries! Your neck movements helped you find all the aliens!
+                </p>
+                <div className="flex justify-center space-x-4 mb-6">
+                  {spaceScanAreas.map((area, idx) => (
+                    <div key={idx} className="text-center">
+                      <div className="text-3xl mb-1">{area.alien}</div>
+                      <Star className="w-5 h-5 text-yellow-500 mx-auto" />
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-white rounded-xl p-4 mb-6">
+                  <h4 className="font-bold text-gray-800 mb-2">Your Discoveries:</h4>
+                  {spaceScanAreas.map((area, idx) => (
+                    <p key={idx} className="text-sm text-gray-600 mb-1">
+                      {area.emoji} {area.discovery}
+                    </p>
+                  ))}
+                </div>
+                <div className="space-x-4">
+                  <button
+                    onClick={resetSpaceGame}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all"
+                  >
+                    Explore Again! 🔄
                   </button>
                   <button
                     onClick={() => setActiveTab('simon-says')}
