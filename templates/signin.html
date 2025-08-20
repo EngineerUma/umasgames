@@ -218,7 +218,10 @@
                     { p: 100, t: "Welcome to Uma's Games!", ms: 4000 }
                 ];
 
-                let i = 0, start;
+                // total duration across all steps (used to compute a monotonic progress value)
+                const totalDuration = steps.reduce((s, st) => s + st.ms, 0);
+                let start = null;
+                let nextStepIndex = 0;
 
                 function positionBunny(progressPercent) {
                     // progressPercent: 0..1
@@ -243,27 +246,27 @@
 
                 function tick(ts) {
                     if (!start) start = ts;
-                    const elapsed = ts - start;
-                    const target = steps[i];
+                    const elapsedTotal = ts - start;
 
-                    // Linear interpolation to target progress
-                    const progress = Math.min((elapsed / target.ms) * target.p, target.p);
-                    // apply to CSS var and visuals
+                    // Monotonic progress from 0..100 over totalDuration
+                    const progress = Math.min((elapsedTotal / totalDuration) * 100, 100);
                     root.style.setProperty('--progress', progress);
                     bar.style.width = progress + '%';
 
                     const p = Math.max(0, Math.min(1, progress / 100));
                     positionBunny(p);
 
-                    if (progress >= target.p) {
-                        loadingText.textContent = target.t;
-                        start = ts;
-                        i++;
-                        if (i === steps.length) {
-                            setTimeout(() => location.href = '/games', 1200);
-                            return;
-                        }
+                    // Advance loading text when crossing each step threshold (never backtracks)
+                    while (nextStepIndex < steps.length && progress >= steps[nextStepIndex].p) {
+                        loadingText.textContent = steps[nextStepIndex].t;
+                        nextStepIndex++;
                     }
+
+                    if (progress >= 100) {
+                        setTimeout(() => location.href = '/games', 900);
+                        return;
+                    }
+
                     requestAnimationFrame(tick);
                 }
 
