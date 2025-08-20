@@ -184,56 +184,115 @@
                     return;
                 }
                 
-                // Show loading page with progress bar
+                // Show loading page with silky smooth wave
                 document.body.innerHTML = `
-                    <div style="text-align: center; padding: 4rem; max-width: 600px; margin: 0 auto;">
+                    <svg width="0" height="0" style="position:absolute">
+                        <defs>
+                            <clipPath id="waveClip">
+                                <path id="wavePath" d="M0 30 Q 50 5 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 T 900 30 T 1000 30 V60 H0 Z"/>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                    
+                    <div class="loader">
                         <h1>🐰 Loading Uma's Games...</h1>
-                        <div style="margin: 3rem 0;">
-                            <div style="background: #f0f0f0; height: 40px; border-radius: 20px; position: relative; overflow: hidden; border: 2px solid #ddd;">
-                                <div id="progressBar" style="background: linear-gradient(90deg, #4CAF50, #81C784); height: 100%; width: 0%; border-radius: 18px; transition: width 0.5s ease;"></div>
-                                <div id="rabbitRunner" style="position: absolute; top: 50%; transform: translateY(-50%); left: -30px; font-size: 2rem; transition: left 0.5s ease;">🐰</div>
-                            </div>
-                            <div style="margin-top: 1rem; font-size: 1.2rem;" id="loadingText">Initializing hop sequence...</div>
+                        <div class="track">
+                            <div class="bar"></div>
+                            <span class="runner" aria-hidden="true">🐰</span>
                         </div>
+                        <p id="loadingText">Initializing hop sequence...</p>
                         <div style="font-size: 1.5rem; margin: 2rem 0;">
                             <span style="animation: hop 0.6s infinite ease-in-out;">🐇</span>
                             <span style="animation: hop 0.6s infinite ease-in-out 0.2s;">🐰</span>
                             <span style="animation: hop 0.6s infinite ease-in-out 0.4s;">🐇</span>
                         </div>
                     </div>
+                    
                     <style>
+                        .loader { text-align: center; padding: 4rem 1rem; max-width: 600px; margin: 0 auto; }
+                        
+                        .track {
+                            height: 60px;
+                            position: relative;
+                            background: #f0f0f0;
+                            border: 2px solid #ddd;
+                            clip-path: url(#waveClip);
+                            overflow: visible;
+                            margin: 3rem 0;
+                        }
+                        
+                        .bar {
+                            height: 100%;
+                            background: linear-gradient(90deg, #4CAF50, #81C784);
+                            width: calc(var(--progress, 0) * 1%);
+                            clip-path: url(#waveClip);
+                            transition: width 0.4s linear;
+                        }
+                        
+                        .runner {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            font-size: 2.2rem;
+                            offset-path: path('M0 30 Q 50 5 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 T 900 30 T 1000 30');
+                            offset-distance: calc(var(--progress, 0) * 1%);
+                            transform: translate(-50%, -50%) translateZ(0);
+                            pointer-events: none;
+                            animation: gentleHop 2.5s ease-in-out infinite;
+                        }
+                        
                         @keyframes hop {
                             0%, 100% { transform: translateY(0px); }
                             50% { transform: translateY(-30px); }
                         }
+                        
+                        @keyframes gentleHop {
+                            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+                            50% { transform: translate(-50%, -65%) rotate(-8deg); }
+                        }
+                        
+                        @media (prefers-reduced-motion: reduce) {
+                            .runner { animation: none; }
+                            .bar { transition: none; }
+                        }
                     </style>
                 `;
                 
-                const progressBar = document.getElementById('progressBar');
-                const rabbitRunner = document.getElementById('rabbitRunner');
                 const loadingText = document.getElementById('loadingText');
+                const root = document.documentElement;
                 
-                const loadingSteps = [
-                    { progress: 20, text: "Gathering carrots...", delay: 500 },
-                    { progress: 40, text: "Polishing game controllers...", delay: 1000 },
-                    { progress: 60, text: "Warming up the fun engines...", delay: 1500 },
-                    { progress: 80, text: "Almost ready to play...", delay: 2000 },
-                    { progress: 100, text: "Welcome to Uma's Games!", delay: 2500 }
+                const steps = [
+                    { p: 20, t: "Gathering carrots...", ms: 1000 },
+                    { p: 40, t: "Polishing game controllers...", ms: 2000 },
+                    { p: 60, t: "Warming up the fun engines...", ms: 3000 },
+                    { p: 80, t: "Almost ready to play...", ms: 4000 },
+                    { p: 100, t: "Welcome to Uma's Games!", ms: 5000 }
                 ];
                 
-                loadingSteps.forEach((step, index) => {
-                    setTimeout(() => {
-                        progressBar.style.width = step.progress + '%';
-                        rabbitRunner.style.left = (step.progress * 5.5) + 'px'; // Move rabbit along
-                        loadingText.textContent = step.text;
-                        
-                        if (step.progress === 100) {
-                            setTimeout(() => {
-                                window.location.href = '/games';
-                            }, 1000);
+                let i = 0, start;
+                
+                function tick(ts) {
+                    if (!start) start = ts;
+                    const elapsed = ts - start;
+                    const target = steps[i];
+                    
+                    // Linear interpolation to target progress
+                    const progress = Math.min((elapsed / target.ms) * target.p, target.p);
+                    root.style.setProperty('--progress', progress);
+                    
+                    if (progress >= target.p) {
+                        loadingText.textContent = target.t;
+                        start = ts;
+                        i++;
+                        if (i === steps.length) {
+                            setTimeout(() => location.href = '/games', 1500);
+                            return;
                         }
-                    }, step.delay);
-                });
+                    }
+                    requestAnimationFrame(tick);
+                }
+                
+                requestAnimationFrame(tick);
             });
         });
     </script>
