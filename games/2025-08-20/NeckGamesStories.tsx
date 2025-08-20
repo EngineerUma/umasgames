@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, Gamepad2, ChevronLeft, ChevronRight, Play, Pause, RotateCcw, CheckCircle, Star } from 'lucide-react';
 
 const NeckGamesStories = () => {
-  const [activeTab, setActiveTab] = useState('games');
+  const [activeTab, setActiveTab] = useState('simon-says');
   const [currentStory, setCurrentStory] = useState(0);
   
   // Interactive Animal Pose Challenge states
@@ -14,6 +14,7 @@ const NeckGamesStories = () => {
 
   const games = [
     {
+      id: "simon-says",
       name: "Simon Says Neck Edition",
       description: "Play Simon Says with neck-friendly moves!",
       instructions: [
@@ -26,6 +27,7 @@ const NeckGamesStories = () => {
       emoji: "🎮"
     },
     {
+      id: "animal-challenge",
       name: "Animal Pose Challenge",
       description: "Can you copy these animal poses?",
       instructions: [
@@ -39,6 +41,7 @@ const NeckGamesStories = () => {
       isInteractive: true
     },
     {
+      id: "neck-detective",
       name: "Neck Detective",
       description: "Find the clues by moving your neck!",
       instructions: [
@@ -51,6 +54,7 @@ const NeckGamesStories = () => {
       emoji: "🕵️"
     },
     {
+      id: "magical-mirror",
       name: "Magical Mirror",
       description: "Copy the mirror's magic movements!",
       instructions: [
@@ -63,6 +67,7 @@ const NeckGamesStories = () => {
       emoji: "🪞"
     },
     {
+      id: "robot-human",
       name: "Robot vs Human",
       description: "Move smoothly like a human, not jerky like a robot!",
       instructions: [
@@ -75,6 +80,7 @@ const NeckGamesStories = () => {
       emoji: "🤖"
     },
     {
+      id: "weather-reporter",
       name: "Weather Reporter",
       description: "Be a TV weather person pointing at the sky!",
       instructions: [
@@ -87,6 +93,7 @@ const NeckGamesStories = () => {
       emoji: "📺"
     },
     {
+      id: "sleepy-stretches",
       name: "Sleepy Stretches",
       description: "Gentle moves like a cat waking up from a nap!",
       instructions: [
@@ -99,6 +106,7 @@ const NeckGamesStories = () => {
       emoji: "😴"
     },
     {
+      id: "space-explorer",
       name: "Space Explorer",
       description: "Look around for aliens and planets!",
       instructions: [
@@ -111,6 +119,7 @@ const NeckGamesStories = () => {
       emoji: "🚀"
     },
     {
+      id: "dancing-dj",
       name: "Dancing DJ",
       description: "Move your head and shoulders to the rhythm!",
       instructions: [
@@ -123,6 +132,7 @@ const NeckGamesStories = () => {
       emoji: "🎵"
     },
     {
+      id: "superhero-training",
       name: "Superhero Training",
       description: "Train your neck like a superhero!",
       instructions: [
@@ -309,42 +319,38 @@ const NeckGamesStories = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex mb-8 bg-white rounded-2xl p-2 shadow-lg">
-          <button
-            onClick={() => setActiveTab('games')}
-            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl transition-all font-medium ${
-              activeTab === 'games'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            <Gamepad2 className="w-5 h-5 mr-2" />
-            Fun Games
-          </button>
-          {(activeTab === 'animalGame') && (
+        <div className="mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 bg-white rounded-2xl p-2 shadow-lg">
+            {games.map((game) => (
+              <button
+                key={game.id}
+                onClick={() => setActiveTab(game.id)}
+                className={`flex flex-col items-center justify-center py-2 px-2 rounded-xl transition-all font-medium text-xs ${
+                  activeTab === game.id
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                <span className="text-lg mb-1">{game.emoji}</span>
+                <span className="text-center leading-tight">{game.name}</span>
+              </button>
+            ))}
             <button
-              onClick={() => setActiveTab('animalGame')}
-              className="flex-1 flex items-center justify-center py-3 px-4 rounded-xl transition-all font-medium bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-md"
+              onClick={() => setActiveTab('stories')}
+              className={`flex flex-col items-center justify-center py-2 px-2 rounded-xl transition-all font-medium text-xs ${
+                activeTab === 'stories'
+                  ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
             >
-              <span className="mr-2">🦒</span>
-              Animal Challenge
+              <BookOpen className="w-4 h-4 mb-1" />
+              <span className="text-center leading-tight">Stories</span>
             </button>
-          )}
-          <button
-            onClick={() => setActiveTab('stories')}
-            className={`flex-1 flex items-center justify-center py-3 px-4 rounded-xl transition-all font-medium ${
-              activeTab === 'stories'
-                ? 'bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-md'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            <BookOpen className="w-5 h-5 mr-2" />
-            Stories
-          </button>
+          </div>
         </div>
 
         {/* Interactive Animal Pose Challenge Tab */}
-        {activeTab === 'animalGame' && (
+        {activeTab === 'animal-challenge' && (
           <div>
             <div className="text-center mb-6">
               <div className="text-4xl mb-4">🎪</div>
@@ -355,10 +361,10 @@ const NeckGamesStories = () => {
                 Follow along with the timer and copy each animal pose!
               </p>
               <button
-                onClick={() => setActiveTab('games')}
+                onClick={() => setActiveTab('simon-says')}
                 className="mt-3 text-purple-500 hover:text-purple-700 text-sm underline"
               >
-                ← Back to All Games
+                ← Back to Other Games
               </button>
             </div>
 
@@ -486,7 +492,7 @@ const NeckGamesStories = () => {
                     Play Again! 🔄
                   </button>
                   <button
-                    onClick={() => setActiveTab('games')}
+                    onClick={() => setActiveTab('simon-says')}
                     className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
                   >
                     Try Other Games
@@ -497,88 +503,40 @@ const NeckGamesStories = () => {
           </div>
         )}
 
-        {/* Games Tab */}
-        {activeTab === 'games' && (
-          <div>
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-4">🎮</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Fun Neck Games
-              </h2>
-              <p className="text-gray-600">
-                Play these games while helping your neck feel amazing!
-              </p>
-            </div>
+        {/* Individual Game Sections */}
+        {games.map((game) => (
+          activeTab === game.id && !game.isInteractive && (
+            <div key={game.id}>
+              <div className="text-center mb-6">
+                <div className="text-6xl mb-4">{game.emoji}</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  {game.name}
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  {game.description}
+                </p>
+              </div>
 
-            <div className="space-y-6">
-              {games.map((game, index) => (
-                <div key={index} className="bg-gradient-to-r from-pink-100 to-yellow-100 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="flex items-center mb-4">
-                    <span className="text-3xl mr-4">{game.emoji}</span>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-800">{game.name}</h3>
-                      <p className="text-gray-600">{game.description}</p>
+              <div className="bg-gradient-to-r from-pink-100 to-yellow-100 rounded-2xl p-8 shadow-lg">
+                <div className="bg-white rounded-xl p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">How to Play:</h3>
+                  {game.instructions.map((instruction, idx) => (
+                    <div key={idx} className="flex items-start mb-4 last:mb-0">
+                      <span className="text-purple-500 mr-4 font-bold text-xl">{idx + 1}.</span>
+                      <span className="text-gray-700 text-lg">{instruction}</span>
                     </div>
-                    {game.isInteractive && (
-                      <button
-                        onClick={() => setActiveTab('animalGame')}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all"
-                      >
-                        Play Now! 🎮
-                      </button>
-                    )}
-                  </div>
-                  
-                  {!game.isInteractive && (
-                    <div className="bg-white rounded-xl p-4">
-                      {game.instructions.map((instruction, idx) => (
-                        <div key={idx} className="flex items-start mb-3 last:mb-0">
-                          <span className="text-purple-500 mr-3 font-bold text-lg">{idx + 1}.</span>
-                          <span className="text-gray-700">{instruction}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {game.isInteractive && (
-                    <div className="bg-white rounded-xl p-4 text-center">
-                      <div className="text-4xl mb-3">🎪✨</div>
-                      <p className="text-gray-700 mb-4">This is our special interactive game! Click "Play Now" to start the Animal Pose Challenge with timers, progress tracking, and fun animations!</p>
-                      <div className="flex justify-center space-x-2">
-                        {animalPoses.map((pose, idx) => (
-                          <span key={idx} className="text-2xl">{pose.emoji}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-              
-              <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-6 text-center shadow-lg">
-                <div className="text-3xl mb-3">🎯</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Game Safety Tips</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white rounded-lg p-3">
-                    <span className="text-2xl">🐌</span>
-                    <p className="text-gray-700 font-medium">Move slowly and gently</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <span className="text-2xl">⛔</span>
-                    <p className="text-gray-700 font-medium">Stop if anything hurts</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <span className="text-2xl">🎨</span>
-                    <p className="text-gray-700 font-medium">Use your imagination!</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                    <p className="text-gray-700 font-medium">Play with family & friends</p>
-                  </div>
+                
+                <div className="mt-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4 text-center">
+                  <div className="text-2xl mb-2">🎯</div>
+                  <h4 className="text-lg font-bold text-gray-800 mb-2">Remember!</h4>
+                  <p className="text-gray-700">Move slowly, have fun, and stop if anything hurts!</p>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        ))}
 
         {/* Stories Tab */}
         {activeTab === 'stories' && (
