@@ -18,6 +18,21 @@ def games_from_date(date: Path) -> list[Path]:
     "Return sorted list of .html, .js, and .tsx files in the given date directory."
     return sorted([f for f in date.iterdir() if f.is_file() and f.suffix in ['.html', '.js', '.tsx']], reverse=True)
 
+def preview_src(date: Path, game: Path) -> str:
+    "Return URL used in iframe src."
+    return f"/games/{date.name}/{game.name}"
+
+def preview_iframe(date: Path, game: Path):
+    "Return the Air component for an iframe preview."
+    return air.Iframe(
+        src=preview_src(date, game),
+        width="450",
+        height="300",
+        loading="lazy",
+        sandbox="allow-scripts allow-same-origin",
+        style="border:1px solid #ccc;border-radius:6px;"
+    )
+
 def browse_by_date():
     return air.Nav(
         air.H2("Browse by Date"),
@@ -75,8 +90,15 @@ async def games_index() -> HTMLResponse:
                     air.P(f"Games made: {len(games_from_date(date))}")
                 ),
                 *[
-                    air.Aside(
-                        air.A(f"{space_pascal(game.stem)} ", href=f"/games/{date.name}/{game.name}")
+                    air.Div(
+                        air.H3(space_pascal(game.stem)),
+                        preview_iframe(date, game),
+                        air.Br(),
+                        air.A("Open full screen",
+                              href=f"/games/{date.name}/{game.name}",
+                              target="_blank",
+                              style="display:inline-block;margin-top:4px;"),
+                        style="margin-bottom:1.5rem;"
                     )
                     for game in games_from_date(date)
                 ],
