@@ -23,14 +23,37 @@ def preview_src(date: Path, game: Path) -> str:
     return f"/games/{date.name}/{game.name}"
 
 def preview_iframe(date: Path, game: Path):
-    "Return the Air component for an iframe preview."
-    return air.Iframe(
-        src=preview_src(date, game),
-        width="450",
-        height="300",
-        loading="lazy",
-        sandbox="allow-scripts allow-same-origin",
-        style="border:1px solid #ccc;border-radius:6px;"
+    "Return the Air component for an iframe preview with click overlay."
+    return air.Div(
+        air.Iframe(
+            src=preview_src(date, game),
+            width="450",
+            height="300",
+            loading="lazy",
+            sandbox="allow-scripts allow-same-origin",
+            style="border:1px solid #ccc;border-radius:6px;"
+        ),
+        air.Div(
+            style="""
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.1);
+                opacity: 0;
+                transition: opacity 0.2s;
+                border-radius: 6px;
+            """,
+            onclick=f"window.open('/games/{date.name}/{game.name}', '_blank')",
+            onmouseover="this.style.opacity = '1'",
+            onmouseout="this.style.opacity = '0'"
+        ),
+        style="position: relative; display: inline-block;"
     )
 
 def browse_by_date():
