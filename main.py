@@ -31,7 +31,8 @@ def preview_iframe(date: Path, game: Path):
             height="300",
             loading="lazy",
             sandbox="allow-scripts allow-same-origin",
-            style="border:1px solid #ccc;border-radius:6px;"
+            style="border:1px solid #ccc;border-radius:6px;overflow:hidden;",
+            scrolling="no"
         ),
         air.Div(
             style="""
@@ -116,11 +117,6 @@ async def games_index() -> HTMLResponse:
                     air.Div(
                         air.H3(space_pascal(game.stem)),
                         preview_iframe(date, game),
-                        air.Br(),
-                        air.A("Open full screen",
-                              href=f"/games/{date.name}/{game.name}",
-                              target="_blank",
-                              style="display:inline-block;margin-top:4px;"),
                         style="margin-bottom:1.5rem;"
                     )
                     for game in games_from_date(date)
