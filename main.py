@@ -81,6 +81,27 @@ def browse_by_date():
         ),
     )
 
+def navbar():
+    return air.Nav(
+        air.Div(
+            air.A("🏠 Uma's Games", href="/games", style="font-weight: bold; text-decoration: none; color: inherit;"),
+            style="flex: 1;"
+        ),
+        air.Div(
+            air.A("All Games", href="/games", style="margin: 0 1rem; text-decoration: none; color: inherit;"),
+            air.A("Teacher Games", href="/teachers", style="margin: 0 1rem; text-decoration: none; color: inherit;"),
+            style="display: flex;"
+        ),
+        style="""
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 2rem;
+        """
+    )
+
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 
@@ -115,6 +136,7 @@ async def index(request: Request) -> HTMLResponse:
 @app.get("/games")
 async def games_index() -> HTMLResponse:
     return air.layouts.mvpcss(
+        navbar(),
         air.H1("Uma's Games"),
         air.P("Hi, I'm Uma. Look at my games! I made these mostly by myself with Claude, and a little help from my mommy. I started making games when I was 5. I'm 6 now!"),
         browse_by_date(),
@@ -142,6 +164,7 @@ async def games_index() -> HTMLResponse:
 @app.get("/teachers")
 async def teachers_index() -> HTMLResponse:
     return air.layouts.mvpcss(
+        navbar(),
         air.H1("Teacher's Games"),
         air.P("Educational games suitable for classroom use."),
         air.Section(
