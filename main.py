@@ -115,9 +115,8 @@ async def games_index() -> HTMLResponse:
                 ),
                 *[
                     air.Div(
-                        air.H3(space_pascal(game.stem)),
                         preview_iframe(date, game),
-                        style="margin-bottom:1.5rem;"
+                        style="margin: 1rem 0.75rem 1.5rem 0.75rem;"
                     )
                     for game in games_from_date(date)
                 ],
