@@ -10,6 +10,18 @@ app: air.Air = air.Air()
 jinja = air.templates.JinjaRenderer(directory=Path(".") / "templates")
 dates: list[Path] = sorted([d for d in Path(GAMES_DIR).iterdir() if d.is_dir()], reverse=True)
 
+teacher_games = [
+    ("2024-08-24", "BunnyMath.html"),
+    ("2024-08-25", "PrincessTypingAdventure.html"),
+    ("2024-08-27", "BeachPoetryAdventure.html"),
+    ("2024-08-27", "ColourMixingAdventure.html"),
+    ("2024-08-27", "MagicalShiningSymmetryDrawing.html"),
+    ("2024-08-27", "SpaceExplorerRocketLaunch.html"),
+    ("2024-08-28", "BloodCellDefender.html"),
+    ("2025-08-20", "BouncyWheelOfNames.html"),
+    ("2025-08-20", "NeckGamesStories.tsx"),
+]
+
 def space_pascal(s: str) -> str:
     return re.sub(r'(?<!^)(?=[A-Z])', ' ', s)
 
@@ -125,4 +137,24 @@ async def games_index() -> HTMLResponse:
             )
             for date in dates
         ],
+    )
+
+@app.get("/teachers")
+async def teachers_index() -> HTMLResponse:
+    return air.layouts.mvpcss(
+        air.H1("Teacher's Games"),
+        air.P("Educational games suitable for classroom use."),
+        air.Section(
+            air.Header(
+                air.H2("Educational Games"),
+                air.P(f"Selected games: {len(teacher_games)}")
+            ),
+            *[
+                air.Div(
+                    preview_iframe(Path(date), Path(game)),
+                    style="margin: 1rem 0.75rem 1.5rem 0.75rem;"
+                )
+                for date, game in teacher_games
+            ],
+        ),
     )
