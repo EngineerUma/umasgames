@@ -1,7 +1,6 @@
 import re
 import air
 from pathlib import Path
-from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse
 
 GAMES_DIR = "games"
@@ -103,7 +102,7 @@ def navbar():
     )
 
 @app.get("/games/{date}/{name}", response_model=None)
-async def serve_game_asset(request: Request, date: str, name: str) -> FileResponse | HTMLResponse:
+async def serve_game_asset(request: air.Request, date: str, name: str) -> FileResponse | HTMLResponse:
     "Serve game assets from /games/{date}/{name}"
     file_path: Path = Path(f"{GAMES_DIR}/{date}/{name}")
     if not file_path.exists() or not file_path.is_file():
@@ -125,7 +124,7 @@ async def serve_game_asset(request: Request, date: str, name: str) -> FileRespon
     return FileResponse(file_path)
 
 @app.get("/")
-async def index(request: Request) -> HTMLResponse:
+async def index(request: air.Request) -> HTMLResponse:
     return jinja(request, "signin.html")
 
 @app.get("/games")
