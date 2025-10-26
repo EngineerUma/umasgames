@@ -3,12 +3,11 @@ import air
 from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse
-from starlette.templating import Jinja2Templates
 
 GAMES_DIR = "games"
 
 app: air.Air = air.Air()
-jinja = air.templates.JinjaRenderer(directory=Path(".") / "templates")
+jinja = air.JinjaRenderer(directory="templates")
 dates: list[Path] = sorted([d for d in Path(GAMES_DIR).iterdir() if d.is_dir()], reverse=True)
 
 teacher_games = [
@@ -103,8 +102,6 @@ def navbar():
         """
     )
 
-templates = Jinja2Templates(directory="templates")
-
 @app.get("/games/{date}/{name}", response_model=None)
 async def serve_game_asset(request: Request, date: str, name: str) -> FileResponse | HTMLResponse:
     "Serve game assets from /games/{date}/{name}"
@@ -129,7 +126,7 @@ async def serve_game_asset(request: Request, date: str, name: str) -> FileRespon
 
 @app.get("/")
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("signin.html", {"request": request})
+    return jinja(request, "signin.html")
 
 @app.get("/games")
 async def games_index() -> HTMLResponse:
