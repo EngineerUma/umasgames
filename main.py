@@ -1,8 +1,9 @@
-
 import re
 import air
 from pathlib import Path
+from starlette.requests import Request
 from starlette.responses import HTMLResponse, FileResponse
+from starlette.templating import Jinja2Templates
 
 GAMES_DIR = "games"
 
@@ -101,9 +102,6 @@ def navbar():
             margin-bottom: 2rem;
         """
     )
-
-from starlette.requests import Request
-from starlette.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
 
