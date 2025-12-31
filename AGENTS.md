@@ -1,4 +1,6 @@
-# AGENT.md - Uma's Games Project Guide
+# AGENTS.md - Uma's Games Project Guide
+
+Hi, I'm Uma! I make games. Each game is a file in `games/` under the date I made it.
 
 ## Development Commands
 - **Start dev server**: `just dev` (runs on port 8000)
